@@ -18,6 +18,7 @@ print(dataset.head())
 print(dataset.info(verbose=True))
 print(dataset.describe(percentiles=[0.1, 0.2, 0.3, 0.6, 0.8]))
 print(dataset.describe().T)
+
 print("-----------------------------------")
 print(dataset.mean())
 print(dataset.median())
@@ -44,6 +45,26 @@ dataset_nonul['BMI'].fillna(dataset_nonul['BMI'].mean(), inplace=True)
 
 print(dataset.shape)
 
+# age_group = sorted(set(dataset["Age"]))
+# print(age_group)
+#
+# for age in age_group:
+#     data_age = dataset_nonul[dataset_nonul["Age"] == age]
+#     plt.scatter(data_age["BMI"], data_age["SkinThickness"])
+#     plt.title(age)
+#     plt.xlabel("BMI")
+#     plt.ylabel("SkinThickness")
+#     plt.show()
+
+# for i in range(0, 2):
+#     data_outcome = dataset_nonul[dataset_nonul["Outcome"] == i]
+#     plt.scatter(data_outcome["Insulin"], data_outcome["Glucose"], 5)
+#     plt.title("Diabetes result " + str(i))
+#     plt.xlabel("Insulin level")
+#     plt.ylabel("Glucose level")
+#     plt.show()
+#
+
 import missingno as msno
 # p = msno.bar(dataset)
 # plt.show()
@@ -54,19 +75,19 @@ import missingno as msno
 # p = dataset.Outcome.value_counts().plot(kind="bar")
 # p.Color = colors
 # plt.show()
-
-from pandas.plotting import scatter_matrix
-
-# p = scatter_matrix(dataset, figsize=(25, 25))
-# p = sns.pairplot(dataset_nonul, hue='Outcome')
 #
+from pandas.plotting import scatter_matrix
+#
+# p = scatter_matrix(dataset, figsize=(25, 25))
+p = sns.pairplot(dataset_nonul, hue='Outcome')
+
 # plt.figure(figsize=(12, 10))  # on this line I just set the size of figure to 12 by 10.
 # p = sns.heatmap(dataset.corr(), annot=True, cmap='RdYlGn')  # seaborn has very simple solution for heatmap
 #
 # plt.figure(figsize=(12, 10))  # on this line I just set the size of figure to 12 by 10.
 # p = sns.heatmap(dataset_nonul.corr(), annot=True, cmap='RdYlGn')  # seaborn has very simple solution for heatmap
-
-# plt.show()
+#
+plt.show()
 
 from sklearn.preprocessing import StandardScaler
 
