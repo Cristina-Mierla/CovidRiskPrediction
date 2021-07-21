@@ -31,8 +31,8 @@ dataset_nonul[['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']] =
 print(dataset_nonul.isnull().sum())
 
 # understanding the new null values found
-# p = dataset.hist(figsize=(20, 20))
-# plt.show()
+p = dataset.hist(figsize=(20, 20))
+plt.show()
 
 dataset_nonul['Glucose'].fillna(dataset_nonul['Glucose'].mean(), inplace=True)
 dataset_nonul['BloodPressure'].fillna(dataset_nonul['BloodPressure'].mean(), inplace=True)
@@ -40,8 +40,8 @@ dataset_nonul['SkinThickness'].fillna(dataset_nonul['SkinThickness'].median(), i
 dataset_nonul['Insulin'].fillna(dataset_nonul['Insulin'].median(), inplace=True)
 dataset_nonul['BMI'].fillna(dataset_nonul['BMI'].mean(), inplace=True)
 
-# p = dataset_nonul.hist(figsize=(20, 20))
-# plt.show()
+p = dataset_nonul.hist(figsize=(20, 20))
+plt.show()
 
 print(dataset.shape)
 
@@ -66,27 +66,27 @@ print(dataset.shape)
 #
 
 import missingno as msno
-# p = msno.bar(dataset)
-# plt.show()
-#
-# color_wheel = {1: "#0392cf", 2: "#7bc043"}
-# colors = dataset["Outcome"].map(lambda x: color_wheel.get(x + 1))
-# print(dataset.Outcome.value_counts())
-# p = dataset.Outcome.value_counts().plot(kind="bar")
-# p.Color = colors
-# plt.show()
-#
+p = msno.bar(dataset)
+plt.show()
+
+color_wheel = {1: "#0392cf", 2: "#7bc043"}
+colors = dataset["Outcome"].map(lambda x: color_wheel.get(x + 1))
+print(dataset.Outcome.value_counts())
+p = dataset.Outcome.value_counts().plot(kind="bar")
+p.Color = colors
+plt.show()
+
 from pandas.plotting import scatter_matrix
 #
-# p = scatter_matrix(dataset, figsize=(25, 25))
+p = scatter_matrix(dataset, figsize=(25, 25))
 p = sns.pairplot(dataset_nonul, hue='Outcome')
 
-# plt.figure(figsize=(12, 10))  # on this line I just set the size of figure to 12 by 10.
-# p = sns.heatmap(dataset.corr(), annot=True, cmap='RdYlGn')  # seaborn has very simple solution for heatmap
-#
-# plt.figure(figsize=(12, 10))  # on this line I just set the size of figure to 12 by 10.
-# p = sns.heatmap(dataset_nonul.corr(), annot=True, cmap='RdYlGn')  # seaborn has very simple solution for heatmap
-#
+plt.figure(figsize=(12, 10))  # on this line I just set the size of figure to 12 by 10.
+p = sns.heatmap(dataset.corr(), annot=True, cmap='RdYlGn')  # seaborn has very simple solution for heatmap
+
+plt.figure(figsize=(12, 10))  # on this line I just set the size of figure to 12 by 10.
+p = sns.heatmap(dataset_nonul.corr(), annot=True, cmap='RdYlGn')  # seaborn has very simple solution for heatmap
+
 plt.show()
 
 from sklearn.preprocessing import StandardScaler
@@ -108,48 +108,48 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=1/3, random_
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import f1_score
 from sklearn import metrics
-#
-# test_scores = []
-# train_scores = []
-#
-# error = []
-#
-# for i in range(1, 50):
-#     knn = KNeighborsClassifier(i)
-#     train = knn.fit(X_train, y_train)
-#     predict = knn.predict(X_test)
-#
-#     train_scores.append(knn.score(X_train, y_train))
-#     test_scores.append(knn.score(X_test, y_test))
-#
-#     er = f1_score(predict, y_test)
-#     error.append(1 - er)
-#     print("Accuracy of the model with k = {} is -> {} %".format(i, metrics.accuracy_score(y_test, predict)))
-#
-# # score that comes from testing on the same datapoints that were used for training
-# max_train_score = max(train_scores)
-# train_scores_ind = [i for i, v in enumerate(train_scores) if v == max_train_score]
-# print('Max train score {} % and k = {}'.format(max_train_score*100, list(map(lambda x: x+1, train_scores_ind))))
-#
-# # score that comes from testing on the datapoints that were split in the beginning to be used for testing solely
-# max_test_score = max(test_scores)
-# test_scores_ind = [i for i, v in enumerate(test_scores) if v == max_test_score]
-# print('Max test score {} % and k = {}'.format(max_test_score*100, list(map(lambda x: x+1, test_scores_ind))))
-#
-# # error that come for observing the elbow curve
-# min_error = min(error)
-# min_error_ind = error.index(min_error)
-# print('Min error score {} % and k = {}'.format(min_error*100, min_error_ind))
-# error = list(map(lambda x: 1-x, error))
-#
-# plt.figure(figsize=(12, 5))
-# p = sns.lineplot(range(1, 50), train_scores, marker='*', label='Train Score')
-# p = sns.lineplot(range(1, 50), test_scores, marker='o', label='Test Score')
-# p = sns.lineplot(range(1, 50), error, marker='x', label='1 - Error')
-#
-# plt.ylabel("K")
-#
-# plt.show()
+
+test_scores = []
+train_scores = []
+
+error = []
+
+for i in range(1, 50):
+    knn = KNeighborsClassifier(i)
+    train = knn.fit(X_train, y_train)
+    predict = knn.predict(X_test)
+
+    train_scores.append(knn.score(X_train, y_train))
+    test_scores.append(knn.score(X_test, y_test))
+
+    er = f1_score(predict, y_test)
+    error.append(1 - er)
+    print("Accuracy of the model with k = {} is -> {} %".format(i, metrics.accuracy_score(y_test, predict)))
+
+# score that comes from testing on the same datapoints that were used for training
+max_train_score = max(train_scores)
+train_scores_ind = [i for i, v in enumerate(train_scores) if v == max_train_score]
+print('Max train score {} % and k = {}'.format(max_train_score*100, list(map(lambda x: x+1, train_scores_ind))))
+
+# score that comes from testing on the datapoints that were split in the beginning to be used for testing solely
+max_test_score = max(test_scores)
+test_scores_ind = [i for i, v in enumerate(test_scores) if v == max_test_score]
+print('Max test score {} % and k = {}'.format(max_test_score*100, list(map(lambda x: x+1, test_scores_ind))))
+
+# error that come for observing the elbow curve
+min_error = min(error)
+min_error_ind = error.index(min_error)
+print('Min error score {} % and k = {}'.format(min_error*100, min_error_ind))
+error = list(map(lambda x: 1-x, error))
+
+plt.figure(figsize=(12, 5))
+p = sns.lineplot(range(1, 50), train_scores, marker='*', label='Train Score')
+p = sns.lineplot(range(1, 50), test_scores, marker='o', label='Test Score')
+p = sns.lineplot(range(1, 50), error, marker='x', label='1 - Error')
+
+plt.xlabel("K")
+
+plt.show()
 
 knn = KNeighborsClassifier(11)
 # knn = KNeighborsClassifier(35)
@@ -205,7 +205,7 @@ plt.show()
 
 # Area under ROC curve
 from sklearn.metrics import roc_auc_score
-roc_auc_score(y_test,y_pred_proba)
+roc_auc_score(y_test, y_pred_proba)
 
 # import GridSearchCV
 from sklearn.model_selection import GridSearchCV
