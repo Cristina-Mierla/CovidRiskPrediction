@@ -107,45 +107,49 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=1/3, random_
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import f1_score
-
-test_scores = []
-train_scores = []
-
-error = []
-
-for i in range(1, 50):
-    knn = KNeighborsClassifier(i)
-    train = knn.fit(X_train, y_train)
-    predict = knn.predict(X_test)
-
-    train_scores.append(knn.score(X_train, y_train))
-    test_scores.append(knn.score(X_test, y_test))
-
-    er = f1_score(predict, y_test)
-    error.append(1 - er)
-
-# score that comes from testing on the same datapoints that were used for training
-max_train_score = max(train_scores)
-train_scores_ind = [i for i, v in enumerate(train_scores) if v == max_train_score]
-print('Max train score {} % and k = {}'.format(max_train_score*100, list(map(lambda x: x+1, train_scores_ind))))
-
-# score that comes from testing on the datapoints that were split in the beginning to be used for testing solely
-max_test_score = max(test_scores)
-test_scores_ind = [i for i, v in enumerate(test_scores) if v == max_test_score]
-print('Max test score {} % and k = {}'.format(max_test_score*100, list(map(lambda x: x+1, test_scores_ind))))
-
-# error that come for observing the elbow curve
-min_error = min(error)
-min_error_ind = error.index(min_error)
-print('Min error score {} % and k = {}'.format(min_error*100, min_error_ind))
-error = list(map(lambda x: 1-x, error))
-
-plt.figure(figsize=(12, 5))
-p = sns.lineplot(range(1, 50), train_scores, marker='*', label='Train Score')
-p = sns.lineplot(range(1, 50), test_scores, marker='o', label='Test Score')
-p = sns.lineplot(range(1, 50), error, marker='x', label='1 - Error')
-
-plt.show()
+from sklearn import metrics
+#
+# test_scores = []
+# train_scores = []
+#
+# error = []
+#
+# for i in range(1, 50):
+#     knn = KNeighborsClassifier(i)
+#     train = knn.fit(X_train, y_train)
+#     predict = knn.predict(X_test)
+#
+#     train_scores.append(knn.score(X_train, y_train))
+#     test_scores.append(knn.score(X_test, y_test))
+#
+#     er = f1_score(predict, y_test)
+#     error.append(1 - er)
+#     print("Accuracy of the model with k = {} is -> {} %".format(i, metrics.accuracy_score(y_test, predict)))
+#
+# # score that comes from testing on the same datapoints that were used for training
+# max_train_score = max(train_scores)
+# train_scores_ind = [i for i, v in enumerate(train_scores) if v == max_train_score]
+# print('Max train score {} % and k = {}'.format(max_train_score*100, list(map(lambda x: x+1, train_scores_ind))))
+#
+# # score that comes from testing on the datapoints that were split in the beginning to be used for testing solely
+# max_test_score = max(test_scores)
+# test_scores_ind = [i for i, v in enumerate(test_scores) if v == max_test_score]
+# print('Max test score {} % and k = {}'.format(max_test_score*100, list(map(lambda x: x+1, test_scores_ind))))
+#
+# # error that come for observing the elbow curve
+# min_error = min(error)
+# min_error_ind = error.index(min_error)
+# print('Min error score {} % and k = {}'.format(min_error*100, min_error_ind))
+# error = list(map(lambda x: 1-x, error))
+#
+# plt.figure(figsize=(12, 5))
+# p = sns.lineplot(range(1, 50), train_scores, marker='*', label='Train Score')
+# p = sns.lineplot(range(1, 50), test_scores, marker='o', label='Test Score')
+# p = sns.lineplot(range(1, 50), error, marker='x', label='1 - Error')
+#
+# plt.ylabel("K")
+#
+# plt.show()
 
 knn = KNeighborsClassifier(11)
 # knn = KNeighborsClassifier(35)
@@ -185,10 +189,10 @@ plt.show()
 
 # import classification_report
 from sklearn.metrics import classification_report
-print(classification_report(y_test,y_pred))
+print(classification_report(y_test, y_pred))
 
 from sklearn.metrics import roc_curve
-y_pred_proba = knn.predict_proba(X_test)[:,1]
+y_pred_proba = knn.predict_proba(X_test)[:, 1]
 fpr, tpr, thresholds = roc_curve(y_test, y_pred_proba)
 
 
