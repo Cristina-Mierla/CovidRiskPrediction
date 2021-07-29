@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import missingno as msno
 from pandas.plotting import scatter_matrix
+from pandas.plotting import andrews_curves
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
@@ -157,6 +158,13 @@ class Model:
         plt.xlabel('Predicted label')
         plt.show()
 
+        plt.figure(figsize=(15, 10))
+        sample = self.dataset_nonul.sample(frac=0.05)
+        andrews_curves(sample, "Outcome", color=('red', 'yellow'))
+        plt.title('Andrews Curves Plot', fontsize=20, fontweight='bold')
+        plt.legend(loc=1, prop={'size': 15}, frameon=True, shadow=True, facecolor="white", edgecolor="black")
+        plt.show()
+
         print(classification_report(self.y_test, y_pred))
 
     def plot_roc(self):
@@ -181,6 +189,13 @@ class Model:
 
         print("Best Score:" + str(knn_cv.best_score_))
         print("Best Parameters: " + str(knn_cv.best_params_))
+
+    def predict(self, Medical_record):
+        data = Medical_record
+        output = self.model.predict(data)
+        print(data, output)
+        return output
+
 
 # print(dataset.head())
 # print(dataset.info(verbose=True))
