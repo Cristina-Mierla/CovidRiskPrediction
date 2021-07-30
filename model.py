@@ -43,8 +43,8 @@ class Model:
         self.K = None
         self.model = None
 
-        self.process_data()
-        self.scale_data()
+        # self.process_data()
+        # self.scale_data()
 
         self.train()
         # self.model = pickle.load(open('model.pkl', 'rb'))
@@ -64,6 +64,8 @@ class Model:
         self.dataset_nonul['BMI'].fillna(self.dataset_nonul['BMI'].mean(), inplace=True)
 
     def plot_data(self):
+        self.process_data()
+
         # relationship between values and output
         scatter_matrix(self.dataset, figsize=(25, 25))
         sns.pairplot(self.dataset_nonul, hue='Outcome')
@@ -79,6 +81,8 @@ class Model:
         plt.show()
 
     def scale_data(self):
+        self.process_data()
+
         sc_X = StandardScaler()
         # X = self.dataset_nonul.drop("Outcome", axis=1)
         self.X = pd.DataFrame(sc_X.fit_transform(self.dataset_nonul.drop(["Outcome"], axis=1), ),
@@ -90,6 +94,8 @@ class Model:
                                                                                 random_state=42, stratify=self.y)
 
     def train(self):
+        self.scale_data()
+
         test_scores = []
         train_scores = []
 
@@ -133,7 +139,7 @@ class Model:
         plt.xlabel("K")
         plt.show()
 
-        self.K = test_scores_ind
+        self.K = list(map(lambda x: x + 1, test_scores_ind))[0]
 
         self.model = KNeighborsClassifier(self.K)
         self.model.fit(self.X_train, self.y_train)
