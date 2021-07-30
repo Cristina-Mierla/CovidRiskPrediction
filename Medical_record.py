@@ -13,8 +13,17 @@ class Medical_record:
 
         self.data = [self.__preg, self.__gluc, self.__blpr, self.__skth, self.__insu, self.__bmi, self.__pedi, self.__age]
 
-    def predict(self):
-        output = model.predict(self.data)
+    def predict(self, prediction_model):
+        output = prediction_model.predict(self.data)
         # save new data in the csv
         # return the result
         # print the result in a nice manner
+
+
+'''
+plan:
+    create instance of prediction model at the beginning of the program
+    -> data is cleaned and scaled
+    -> model is trained or the existing model is loaded
+    
+'''

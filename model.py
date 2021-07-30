@@ -17,6 +17,7 @@ from sklearn.metrics import classification_report
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import roc_curve
+import pickle
 
 sns.set()
 pd.set_option('display.max_rows', 500)
@@ -26,8 +27,9 @@ pd.set_option('display.width', 1000)
 
 class Model:
 
-    def __init__(self):
+    def __init__(self): # param csv_name
         self.dataset = pd.read_csv('diabetes.csv')
+        # self.dataset = pd.read_csv(csv_name)
         self.dataset_nonul = self.dataset  # copy of the data set
 
         self.X = None
@@ -40,6 +42,12 @@ class Model:
 
         self.K = None
         self.model = None
+
+        self.process_data()
+        self.scale_data()
+
+        self.train()
+        # self.model = pickle.load(open('model.pkl', 'rb'))
 
     def process_data(self):
         # change the 0 values that dont make sense with NAN
@@ -130,8 +138,10 @@ class Model:
         self.model = KNeighborsClassifier(self.K)
         self.model.fit(self.X_train, self.y_train)
 
+        pickle.dump(self.model, open('model.pkl', 'wb'))
+        self.model = pickle.load(open('model.pkl', 'rb'))
+
     def plot_model(self):
-        k = self.train()
         print(self.model.score(self.X_test, self.y_test))
 
         value = 20000
@@ -148,8 +158,8 @@ class Model:
 
         y_pred = self.model.predict(self.X_test)
         confusion_matrix(self.y_test, y_pred)
-        conf_matrx = pd.crosstab(self.y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True)
-        print(conf_matrx)
+        conf_matrix = pd.crosstab(self.y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True)
+        print(conf_matrix)
 
         cnf_matrix = metrics.confusion_matrix(self.y_test, y_pred)
         sns.heatmap(pd.DataFrame(cnf_matrix), annot=True, cmap="YlGnBu", fmt='g')
@@ -190,10 +200,11 @@ class Model:
         print("Best Score:" + str(knn_cv.best_score_))
         print("Best Parameters: " + str(knn_cv.best_params_))
 
-    def predict(self, Medical_record):
-        data = Medical_record
+    def predict(self, data):
+        self.model = pickle.load(open('model.pkl', 'rb'))
         output = self.model.predict(data)
         print(data, output)
+        pickle.dump(self.model, open('model.pkl', 'wb'))
         return output
 
 
