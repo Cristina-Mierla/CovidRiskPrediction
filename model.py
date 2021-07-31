@@ -43,6 +43,8 @@ class Model:
         self.K = None
         self.model = None
 
+        self.accuracy = 0
+
         # self.process_data()
         # self.scale_data()
 
@@ -93,6 +95,9 @@ class Model:
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=1 / 3,
                                                                                 random_state=42, stratify=self.y)
 
+        self.X_train = sc_X.fit_transform(self.X_train)
+        self.X_test = sc_X.transform(self.X_test)
+
     def train(self):
         self.scale_data()
 
@@ -114,13 +119,13 @@ class Model:
             print(
                 "Accuracy of the model with k = {} is -> {} %".format(i, metrics.accuracy_score(self.y_test, predict)))
 
-        # score that comes from testing on the same datapoints that were used for training
+        # score that comes from testing on the same data points that were used for training
         max_train_score = max(train_scores)
         train_scores_ind = [i for i, v in enumerate(train_scores) if v == max_train_score]
         print('Max train score {} % and k = {}'.format(max_train_score * 100,
                                                        list(map(lambda x: x + 1, train_scores_ind))))
 
-        # score that comes from testing on the datapoints that were split in the beginning to be used for testing solely
+        # score that comes from testing on the data points that were split in the beginning to be used for testing solely
         max_test_score = max(test_scores)
         test_scores_ind = [i for i, v in enumerate(test_scores) if v == max_test_score]
         print(
@@ -136,10 +141,12 @@ class Model:
         sns.lineplot(range(1, 50), train_scores, marker='*', label='Train Score')
         sns.lineplot(range(1, 50), test_scores, marker='o', label='Test Score')
         sns.lineplot(range(1, 50), error, marker='x', label='1 - Error')
+        plt.xlim([5, 25])
         plt.xlabel("K")
         plt.show()
 
         self.K = list(map(lambda x: x + 1, test_scores_ind))[0]
+        self.accuracy = max_test_score
 
         self.model = KNeighborsClassifier(self.K)
         self.model.fit(self.X_train, self.y_train)
@@ -207,6 +214,7 @@ class Model:
         print("Best Parameters: " + str(knn_cv.best_params_))
 
     def predict(self, data):
+        print("Prediction accuracy -> {} %".format(self.accuracy * 100))
         self.model = pickle.load(open('model.pkl', 'rb'))
         output = self.model.predict(data)
         print(data, output)
