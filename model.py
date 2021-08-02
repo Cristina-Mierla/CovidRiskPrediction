@@ -48,7 +48,7 @@ class Model:
         # self.process_data()
         # self.scale_data()
 
-        self.train()
+        # self.train()
         self.model = pickle.load(open('model.pkl', 'rb'))
 
     def process_data(self):
@@ -137,13 +137,13 @@ class Model:
         print('Min error score {} % and k = {}'.format(min_error * 100, min_error_ind))
         error = list(map(lambda x: 1 - x, error))
 
-        plt.figure(figsize=(12, 5))
-        sns.lineplot(range(1, 50), train_scores, marker='*', label='Train Score')
-        sns.lineplot(range(1, 50), test_scores, marker='o', label='Test Score')
-        sns.lineplot(range(1, 50), error, marker='x', label='1 - Error')
-        plt.xlim([5, 25])
-        plt.xlabel("K")
-        plt.show()
+        # plt.figure(figsize=(12, 5))
+        # sns.lineplot(range(1, 50), train_scores, marker='*', label='Train Score')
+        # sns.lineplot(range(1, 50), test_scores, marker='o', label='Test Score')
+        # sns.lineplot(range(1, 50), error, marker='x', label='1 - Error')
+        # plt.xlim([5, 25])
+        # plt.xlabel("K")
+        # plt.show()
 
         self.K = list(map(lambda x: x + 1, test_scores_ind))[0]
         self.accuracy = max_test_score
@@ -214,7 +214,7 @@ class Model:
         print("Best Parameters: " + str(knn_cv.best_params_))
 
     def predict(self, data):
-        print("Prediction accuracy -> {} %".format(self.accuracy * 100))
+        # print("Prediction accuracy -> {} %".format(self.accuracy * 100))
         self.model = pickle.load(open('model.pkl', 'rb'))
         output = self.model.predict(data)
         print(data, output)
