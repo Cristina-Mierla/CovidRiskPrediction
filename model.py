@@ -28,6 +28,7 @@ pd.set_option('display.width', 1000)
 class Model:
 
     def __init__(self): # param csv_name
+        self.csv_name = 'diabetes.csv'
         self.dataset = pd.read_csv('diabetes.csv')
         # self.dataset = pd.read_csv(csv_name)
         self.dataset_nonul = self.dataset  # copy of the data set
@@ -49,7 +50,7 @@ class Model:
         # self.scale_data()
 
         self.train()
-        # self.model = pickle.load(open('model.pkl', 'rb'))
+        self.model = pickle.load(open('model.pkl', 'rb'))
 
     def process_data(self):
         # change the 0 values that dont make sense with NAN
@@ -218,6 +219,20 @@ class Model:
         self.model = pickle.load(open('model.pkl', 'rb'))
         output = self.model.predict(data)
         print(data, output)
+        data = data[0]
+        record = {
+            "Pregnancies": [data[0]],
+            "Glucose": [data[1]],
+            "BloodPressure": [data[2]],
+            "SkinThickness": [data[3]],
+            "Insulin": [data[4]],
+            "BMI": [data[5]],
+            "DiabetesPedigreeFunction": [data[6]],
+            "Age": [data[7]],
+            "Outcome": [output[0]]
+        }
+        df = pd.DataFrame(record)
+        df.to_csv('diabetes.csv', mode='a', index=False, header=False)
         pickle.dump(self.model, open('model.pkl', 'wb'))
         return output
 

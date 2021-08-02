@@ -1,4 +1,6 @@
 # import main Flask class and request object
+import json
+
 from flask import Flask, request
 from Medical_record import Medical_record
 from model import Model
@@ -20,38 +22,65 @@ def get_med_rec():
     age = None
 
     # daca exista si e json
-    if request and request.is_json:
+    if request:
 
-        request_data = request.get_json()
+        # request_data = request.get_json()
 
-        if 'Pregnancies' in request_data:
-            pregnancies = request_data["Pregnancies"]
+        # if 'Pregnancies' in request_data:
+        #     pregnancies = request_data["Pregnancies"]
+        #
+        # if 'Glucose' in request_data:
+        #     glucose = request_data["Glucose"]
+        #
+        # if 'BloodPressure' in request_data:
+        #     bldpressure = request_data["BloodPressure"]
+        #
+        # if 'SkinThickness' in request_data:
+        #     skinthick = request_data['SkinThickness']
+        #
+        # if 'Insulin' in request_data:
+        #     insulin = request_data['Insulin']
+        #
+        # if 'BMI' in request_data:
+        #     bmi = request_data['BMI']
+        #
+        # if 'DiabetesPedigreeFunction' in request_data:
+        #     pedigree = request_data['DiabetesPedigreeFunction']
+        #
+        # if 'Age' in request_data:
+        #     age = request_data['Age']
 
-        if 'Glucose' in request_data:
-            glucose = request_data["Glucose"]
+        form = request.form
 
-        if 'BloodPressure' in request_data:
-            bldpressure = request_data["BloodPressure"]
+        if len(json.loads(form["DiabetPred"])["Pregnancies"]) == 0:
+            pregnancies = json.loads(form["DiabetPred"])["Pregnancies"]
 
-        if 'SkinThickness' in request_data:
-            skinthick = request_data['SkinThickness']
+        if len(json.loads(form["DiabetPred"])["Glucose"]) == 0:
+            pregnancies = json.loads(form["DiabetPred"])["Glucose"]
 
-        if 'Insulin' in request_data:
-            insulin = request_data['Insulin']
+        if len(json.loads(form["DiabetPred"])["BloodPressure"]) == 0:
+            pregnancies = json.loads(form["DiabetPred"])["BloodPressure"]
 
-        if 'BMI' in request_data:
-            bmi = request_data['BMI']
+        if len(json.loads(form["DiabetPred"])["SkinThickness"]) == 0:
+            pregnancies = json.loads(form['DiabetPred'])["SkinThickness"]
 
-        if 'DiabetesPedigreeFunction' in request_data:
-            pedigree = request_data['DiabetesPedigreeFunction']
+        if len(json.loads(form["DiabetPred"])["Insulin"]) == 0:
+            pregnancies = json.loads(form['DiabetPred'])["Insulin"]
 
-        if 'Age' in request_data:
-            age = request_data['Age']
+        if len(json.loads(form["DiabetPred"])["BMI"]) == 0:
+            pregnancies = json.loads(form['DiabetPred'])["BMI"]
+
+        if len(json.loads(form["DiabetPred"])["DiabetesPedigreeFunction"]) == 0:
+            pregnancies = json.loads(form['DiabetPred'])["DiabetesPedigreeFunction"]
+
+        if len(json.loads(form["DiabetPred"])["Age"]) == 0:
+            pregnancies = json.loads(form['DiabetPred'])["Age"]
 
         record = Medical_record(pregnancies, glucose, bldpressure, skinthick, insulin, bmi, pedigree, age)
         prediction = record.predict(prediction_model)
 
-        return "JSON was received and the prediction was -> {}".format(prediction[0]), 200
+        # return "JSON was received and the prediction was -> {}".format(prediction[0]), 200
+        return "{}".format(prediction[0]), 200
 
     else:
 

@@ -15,11 +15,9 @@ class Medical_record:
 
     def predict(self, prediction_model):
         output = prediction_model.predict(self.data)
-        record = self.data[0]
-        record.append(output[0])
-        print(self.data)
-        # save new data in the csv
-        # return the result
+        # record = self.data[0]
+        # record.append(output[0])
+        # print(self.data)
         # print the result in a nice manner
         return output
 
