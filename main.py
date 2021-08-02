@@ -10,7 +10,7 @@ app = Flask(__name__)
 prediction_model = Model()
 
 
-@app.route('/medical-record', methods=['POST'])
+@app.route('/medical-record', methods=['POST', 'GET'])
 def get_med_rec():
     pregnancies = None
     glucose = None
@@ -51,28 +51,13 @@ def get_med_rec():
 
         form = request.form
 
-
         pregnancies = json.loads(form["DiabetPred"])["Pregnancies"]
-
-
         glucose = json.loads(form["DiabetPred"])["Glucose"]
-
-
         bldpressure = json.loads(form["DiabetPred"])["BloodPressure"]
-
-
         skinthick = json.loads(form['DiabetPred'])["SkinThickness"]
-
-
         insulin = json.loads(form['DiabetPred'])["Insulin"]
-
-
         bmi = json.loads(form['DiabetPred'])["BMI"]
-
-
         pedigree = json.loads(form['DiabetPred'])["DiabetesPedigreeFunction"]
-
-
         age = json.loads(form['DiabetPred'])["Age"]
 
         record = Medical_record(pregnancies, glucose, bldpressure, skinthick, insulin, bmi, pedigree, age)
