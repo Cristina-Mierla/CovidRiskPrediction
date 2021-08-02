@@ -10,7 +10,7 @@ app = Flask(__name__)
 prediction_model = Model()
 
 
-@app.route('/medical-record', methods=['GET'])
+@app.route('/medical-record', methods=['POST'])
 def get_med_rec():
     pregnancies = None
     glucose = None
@@ -20,7 +20,6 @@ def get_med_rec():
     bmi = None
     pedigree = None
     age = None
-
     # daca exista si e json
     if request:
 
@@ -52,29 +51,29 @@ def get_med_rec():
 
         form = request.form
 
-        if len(json.loads(form["DiabetPred"])["Pregnancies"]) == 0:
-            pregnancies = json.loads(form["DiabetPred"])["Pregnancies"]
 
-        if len(json.loads(form["DiabetPred"])["Glucose"]) == 0:
-            pregnancies = json.loads(form["DiabetPred"])["Glucose"]
+        pregnancies = json.loads(form["DiabetPred"])["Pregnancies"]
 
-        if len(json.loads(form["DiabetPred"])["BloodPressure"]) == 0:
-            pregnancies = json.loads(form["DiabetPred"])["BloodPressure"]
 
-        if len(json.loads(form["DiabetPred"])["SkinThickness"]) == 0:
-            pregnancies = json.loads(form['DiabetPred'])["SkinThickness"]
+        glucose = json.loads(form["DiabetPred"])["Glucose"]
 
-        if len(json.loads(form["DiabetPred"])["Insulin"]) == 0:
-            pregnancies = json.loads(form['DiabetPred'])["Insulin"]
 
-        if len(json.loads(form["DiabetPred"])["BMI"]) == 0:
-            pregnancies = json.loads(form['DiabetPred'])["BMI"]
+        bldpressure = json.loads(form["DiabetPred"])["BloodPressure"]
 
-        if len(json.loads(form["DiabetPred"])["DiabetesPedigreeFunction"]) == 0:
-            pregnancies = json.loads(form['DiabetPred'])["DiabetesPedigreeFunction"]
 
-        if len(json.loads(form["DiabetPred"])["Age"]) == 0:
-            pregnancies = json.loads(form['DiabetPred'])["Age"]
+        skinthick = json.loads(form['DiabetPred'])["SkinThickness"]
+
+
+        insulin = json.loads(form['DiabetPred'])["Insulin"]
+
+
+        bmi = json.loads(form['DiabetPred'])["BMI"]
+
+
+        pedigree = json.loads(form['DiabetPred'])["DiabetesPedigreeFunction"]
+
+
+        age = json.loads(form['DiabetPred'])["Age"]
 
         record = Medical_record(pregnancies, glucose, bldpressure, skinthick, insulin, bmi, pedigree, age)
         prediction = record.predict(prediction_model)
