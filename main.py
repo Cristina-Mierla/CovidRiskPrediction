@@ -64,7 +64,9 @@ def get_med_rec():
         prediction = record.predict(prediction_model)
 
         # return "JSON was received and the prediction was -> {}".format(prediction[0]), 200
-        return "{}".format(prediction[0]), 200
+        if prediction[0]:
+            return "The patient has a high risk of diabetes", 200
+        return "The patient has a low risk of diabetes", 200
 
     else:
 
