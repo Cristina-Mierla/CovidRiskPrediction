@@ -16,6 +16,7 @@ from sklearn.metrics import classification_report
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import roc_curve
+from DataProcessing import DataProcessing
 import pickle
 
 sns.set()
@@ -27,8 +28,9 @@ pd.set_option('display.width', 1000)
 class Model:
 
     def __init__(self): # param csv_name
-        self.csv_name = 'diabetes.csv'
-        self.dataset = pd.read_csv('diabetes.csv')
+        self.csv_name = 'dataset.csv'
+        data_process = DataProcessing(self.csv_name)
+        self.dataset = data_process.get_dataset()
         # self.dataset = pd.read_csv(csv_name)
         self.dataset_nonul = self.dataset  # copy of the data set
 
@@ -49,7 +51,9 @@ class Model:
         # self.scale_data()
 
         # self.train()
-        self.model = pickle.load(open('model.pkl', 'rb'))
+
+        # self.plot_data()
+        # self.model = pickle.load(open('model.pkl', 'rb'))
 
     def process_data(self):
         # change the 0 values that dont make sense with NAN
@@ -137,13 +141,13 @@ class Model:
         print('Min error score {} % and k = {}'.format(min_error * 100, min_error_ind))
         error = list(map(lambda x: 1 - x, error))
 
-        # plt.figure(figsize=(12, 5))
-        # sns.lineplot(range(1, 50), train_scores, marker='*', label='Train Score')
-        # sns.lineplot(range(1, 50), test_scores, marker='o', label='Test Score')
-        # sns.lineplot(range(1, 50), error, marker='x', label='1 - Error')
-        # plt.xlim([5, 25])
-        # plt.xlabel("K")
-        # plt.show()
+        plt.figure(figsize=(12, 5))
+        sns.lineplot(range(1, 50), train_scores, marker='*', label='Train Score')
+        sns.lineplot(range(1, 50), test_scores, marker='o', label='Test Score')
+        sns.lineplot(range(1, 50), error, marker='x', label='1 - Error')
+        plt.xlim([5, 25])
+        plt.xlabel("K")
+        plt.show()
 
         self.K = list(map(lambda x: x + 1, test_scores_ind))[0]
         self.accuracy = max_test_score
@@ -231,7 +235,7 @@ class Model:
             "Outcome": [output[0]]
         }
         df = pd.DataFrame(record)
-        df.to_csv('diabetes.csv', mode='a', index=False, header=False)
+        # df.to_csv('dataset_cop.csv', mode='a', index=False, header=False)
         pickle.dump(self.model, open('model.pkl', 'wb'))
         return output
 

@@ -2,7 +2,6 @@
 import json
 
 from flask import Flask, request
-from Medical_record import Medical_record
 from model import Model
 
 # create the Flask app
@@ -60,11 +59,10 @@ def get_med_rec():
         pedigree = json.loads(form['DiabetPred'])["DiabetesPedigreeFunction"]
         age = json.loads(form['DiabetPred'])["Age"]
 
-        record = Medical_record(pregnancies, glucose, bldpressure, skinthick, insulin, bmi, pedigree, age)
-        prediction = record.predict(prediction_model)
+
 
         # return "JSON was received and the prediction was -> {}".format(prediction[0]), 200
-        if prediction[0]:
+        if 1:
             return "The patient has a high risk of diabetes", 200
         return "The patient has a low risk of diabetes", 200
 
