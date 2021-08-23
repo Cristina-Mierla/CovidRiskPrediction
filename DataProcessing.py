@@ -2,6 +2,7 @@ import model
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import seaborn as sns
 import missingno as msno
 from scipy.stats import pearsonr, spearmanr
@@ -241,8 +242,27 @@ class DataProcessing:
     '''
     Plotting functions
     '''
+    def plt_data_distribution(self):
+        sns.displot(self.df.Zile_spitalizare, kde=True, rug=True, bins=100)
+        # sns.displot(self.df.zile_ATI, kde=True)
+        plt.show()
 
-    def plt1(self):
+        sns.kdeplot(self.df.stare_externare, data=self.df, shade=True, color='b', hue='Sex')
+        plt.show()
+
+        sns.kdeplot(self.df.Varsta, data=self.df, shade=True, color='r', hue='Sex')
+        plt.show()
+
+        sns.jointplot(x='stare_externare', y='Zile_spitalizare', data=self.df)
+        plt.xlabel("0-Vindecat, 1-Ameliorat, 2-Stationar, 3-Agravat, 4-Decedat")
+        plt.ylabel("Zile de spitalizare")
+        plt.show()
+
+        with sns.axes_style('white'):
+            sns.jointplot(x="Varsta", y='Zile_spitalizare', data=self.df, kind='hex', color='k')
+            plt.show()
+
+    def plt_stare_externare(self):
         data_vindecat = self.df[self.df["stare_externare"] == 0]
         data_decedat = self.df[self.df["stare_externare"] == 4]
         data_ameliorat = self.df[self.df["stare_externare"] == 1]
@@ -272,14 +292,15 @@ class DataProcessing:
         plt.legend(["Vindecat", "Ameliorat", "Decedat"])
         plt.show()
 
-        sns.histplot(data_vindecat, x=data_vindecat["Varsta"], y=data_vindecat["Zile_spitalizare"], cmap='copper_r',
-                     kde=True, label='Vindecat')
-        # plt.ylabel("Zile de spitalizare")
-        # plt.show()
-        sns.histplot(data_decedat, x=data_decedat["Varsta"], y=data_decedat["Zile_spitalizare"], cmap='copper_r',
-                     kde=True,
-                     label='Decedat')
+        fig = plt.figure(figsize=(9, 6))
+        sns.histplot(data_decedat, x=data_decedat["Varsta"], y=data_decedat["Zile_spitalizare"], cmap='OrRd',
+                     kde=True, label='Decedat', bins=45)
+        sns.histplot(data_vindecat, x=data_vindecat["Varsta"], y=data_vindecat["Zile_spitalizare"], cmap='BuGn',
+                     kde=True, label='Vindecat', bins=45, alpha=0.5)
         plt.ylabel("Zile de spitalizare")
+        patch1 = mpatches.Patch(color='green', label='Vindecat')
+        patch2 = mpatches.Patch(color='orange', label='Decedat')
+        plt.legend(handles=[patch1, patch2])
         plt.show()
 
     def plt2(self):
@@ -296,7 +317,7 @@ class DataProcessing:
         sns.kdeplot(self.df.Varsta, data=self.df, shade=True, color='r', hue='Sex')
         plt.show()
 
-        sns.histplot(self.df, x=self.df.stare_externare, hue="Sex", palette="ch:s=.25,rot=-.25", bins=35)
+        sns.histplot(self.df, x=self.df.stare_externare, hue="Sex", palette="ch:s=.25,rot=-.25", bins=35, alpha=0.5)
         plt.xlabel("Stare externare")
         plt.show()
 
