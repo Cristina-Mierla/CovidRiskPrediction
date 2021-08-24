@@ -247,10 +247,21 @@ class DataProcessing:
         # sns.displot(self.df.zile_ATI, kde=True)
         plt.show()
 
+        plt.subplots(figsize=(13, 5))
+        sns.countplot(data=self.df, x='Zile_spitalizare')
+        plt.xticks(rotation=90)
+        plt.xlabel("Zile spitalizare")
+        plt.title("Distributia zilelor de spitalizare")
+        plt.show()
+
         sns.kdeplot(self.df.stare_externare, data=self.df, shade=True, color='b', hue='Sex')
         plt.show()
 
         sns.kdeplot(self.df.Varsta, data=self.df, shade=True, color='r', hue='Sex')
+        plt.show()
+
+        plt.subplots(figsize=(15, 5))
+        sns.distplot(self.df["Varsta"], bins=20, kde=True, rug=False)
         plt.show()
 
         sns.jointplot(x='stare_externare', y='Zile_spitalizare', data=self.df)
@@ -258,9 +269,38 @@ class DataProcessing:
         plt.ylabel("Zile de spitalizare")
         plt.show()
 
+        sns.jointplot(x="Varsta", y='Zile_spitalizare', data=self.df, size=8)
+        plt.show()
+
         with sns.axes_style('white'):
             sns.jointplot(x="Varsta", y='Zile_spitalizare', data=self.df, kind='hex', color='k')
             plt.show()
+
+        sns.stripplot(data=self.df, x='stare_externare', y='Varsta', jitter=True, marker='.')
+        plt.xlabel("Stare externare")
+        plt.title("Cate valori sunt pentru fiecare stare de externare, distribuite pe varsta")
+        plt.show()
+
+        f = sns.FacetGrid(self.df, col="stare_externare")
+        f.map(plt.hist, "Zile_spitalizare")
+        plt.xlim(0, 45)
+        plt.show()
+
+        f = sns.FacetGrid(self.df, col="forma_boala", hue="stare_externare")
+        f.map(plt.scatter, "Zile_spitalizare", "zile_ATI", alpha=0.5, marker='.')
+        f.add_legend()
+        plt.xlim(0, 100)
+        plt.show()
+
+        g = sns.PairGrid(self.df, vars=["Zile_spitalizare", "zile_ATI", "Varsta"], hue="forma_boala")
+        # g.map(plt.scatter)
+        # g.map_diag(sns.histplot)
+        # g.map_offdiag(sns.scatterplot)
+        g.map_upper(sns.scatterplot, size=self.df["Sex"])
+        g.map_lower(sns.kdeplot)
+        g.map_diag(sns.kdeplot)
+        g.add_legend(title="", adjust_subtitles=True)
+        plt.show()
 
     def plt_stare_externare(self):
         data_vindecat = self.df[self.df["stare_externare"] == 0]
@@ -301,266 +341,6 @@ class DataProcessing:
         patch1 = mpatches.Patch(color='green', label='Vindecat')
         patch2 = mpatches.Patch(color='orange', label='Decedat')
         plt.legend(handles=[patch1, patch2])
-        plt.show()
-
-    def plt2(self):
-        sns.displot(self.df.Zile_spitalizare, kde=True, rug=True, bins=100)
-        # sns.displot(self.df.zile_ATI, kde=True)
-        plt.show()
-
-        sns.kdeplot(self.df.stare_externare, shade=True, color='b')
-        plt.show()
-
-        # sns.kdeplot(self.df.Varsta, shade=True, color='r')
-        # plt.show()
-
-        sns.kdeplot(self.df.Varsta, data=self.df, shade=True, color='r', hue='Sex')
-        plt.show()
-
-        sns.histplot(self.df, x=self.df.stare_externare, hue="Sex", palette="ch:s=.25,rot=-.25", bins=35, alpha=0.5)
-        plt.xlabel("Stare externare")
-        plt.show()
-
-        sns.jointplot(x='stare_externare', y='Zile_spitalizare', data=self.df)
-        plt.xlabel("0-Vindecat, 1-Ameliorat, 2-Stationar, 3-Agravat, 4-Decedat")
-        plt.ylabel("Zile de spitalizare")
-        plt.show()
-
-        with sns.axes_style('white'):
-            sns.jointplot(x="Varsta", y='Zile_spitalizare', data=self.df, kind='hex', color='k')
-            plt.show()
-
-        with sns.axes_style('white'):
-            with sns.color_palette("Purples"):
-                sns.jointplot(x="Varsta", y='Zile_spitalizare', data=self.df, kind='kde', shade=True)
-                plt.show()
-
-        with sns.axes_style('white'):
-            with sns.color_palette("Purples"):
-                sns.jointplot(x="Varsta", y='Zile_spitalizare', data=self.df, kind='kde', shade=True,
-                              hue='forma_boala', fill=True)
-                plt.show()
-
-        with sns.axes_style('white'):
-            sns.jointplot(x="forma_boala", y='stare_externare', data=self.df, hue='Sex')
-            plt.show()
-
-    def plt3(self):
-        sns.pairplot(self.df, diag_kind="kde")
-        plt.show()
-
-        sns.pairplot(self.df, vars=["Varsta", "Zile_spitalizare", "zile_ATI"], diag_kind="kde",
-                     hue='stare_externare', palette='light:#3A9', corner=True)
-        plt.show()
-
-        corr = self.df.corr()
-        plt.subplots(figsize=(12, 12))
-        sns.heatmap(corr, vmax=1, annot=True, fmt='.2f', cmap="YlOrRd_r")
-        plt.show()
-
-        sns.lmplot(x='zile_ATI', y='Zile_spitalizare', data=self.df, aspect=2)
-        plt.show()
-
-        sns.lmplot(data=self.df, x='stare_externare', y='Zile_spitalizare', x_jitter=.1, height=9,
-                   x_estimator=np.mean)
-        plt.legend(["0-Vindecat, 1-Ameliorat, 2-Stationar, 3-Agravat, 4-Decedat"])
-        plt.xlim(-1, 5)
-        plt.ylim(0, 22.5)
-        plt.show()
-
-        sns.lmplot(data=self.df, x='Zile_spitalizare', y='zile_ATI', col='forma_boala', hue='Sex')
-        plt.show()
-
-        sns.regplot(data=self.df, x='stare_externare', y='Zile_spitalizare')
-        plt.xlim(-1, 5)
-        plt.ylim(-0.5, 90)
-        plt.show()
-
-    def plt4(self):
-        sns.stripplot(data=self.df, x='stare_externare', y='Varsta', jitter=True)
-        plt.show()
-
-        sns.swarmplot(data=self.df, x='stare_externare', y='Varsta', marker='.')
-        plt.show()
-
-        sns.catplot(data=self.df, x='forma_boala', y='Varsta', kind="violin", split=True, hue='Sex')
-        plt.show()
-
-        # sns.catplot(data=self.df, x='forma_boala', y='Varsta', kind="bar", hue='Sex')
-        # plt.show()
-
-        plt.subplots(figsize=(15, 5))
-        sns.swarmplot(data=self.df, y='forma_boala', x='zile_ATI')
-        plt.show()
-
-        sns.boxplot(data=self.df, x='stare_externare', y='Zile_spitalizare')
-        plt.show()
-
-        sns.violinplot(data=self.df, x='stare_externare', y='Zile_spitalizare', inner='stick')
-        plt.show()
-
-        # plt.subplots(figsize=(13, 5))
-        # sns.barplot(data=self.df, x='Varsta', y='zile_ATI', hue='forma_boala')
-        # plt.xlim(min(self.df.Varsta), max(self.df.Varsta))
-        # plt.xticks(rotation=90)
-        # plt.show()
-
-        plt.subplots(figsize=(13, 5))
-        sns.countplot(data=self.df, x='Zile_spitalizare')
-        plt.xticks(rotation=90)
-        plt.show()
-
-        sns.pointplot(data=self.df, x='stare_externare', y='forma_boala', hue='Sex')
-        plt.show()
-
-        sns.factorplot(data=self.df, x='stare_externare', y='forma_boala', hue='Sex', kind='swarm', size=5,
-                       aspect=2)
-        plt.show()
-
-    def plt5(self):
-        sns.pairplot(self.boala)
-        plt.show()
-
-        corrb = self.boala.corr()
-        plt.subplots(figsize=(12, 12))
-        sns.heatmap(corrb, vmax=1, annot=True, fmt='.2f', cmap="YlOrRd_r")
-        plt.show()
-
-        plt.subplots(figsize=(15, 10))
-        msno.bar(self.df)
-        plt.show()
-
-        pf = self.df
-        del pf["Sex"]
-        del pf["Diag_pr_int"]
-        del pf["forma_boala"]
-        corr = pf.corr()
-        plt.subplots(figsize=(12, 12))
-        sns.heatmap(corr, vmax=1, annot=True, fmt='.2f', cmap="YlOrRd_r")
-        plt.show()
-
-    def plt6(self):
-        f = sns.FacetGrid(self.df, col="stare_externare")
-        f.map(plt.hist, "Zile_spitalizare")
-        plt.xlim(0, 45)
-        plt.show()
-
-        f = sns.FacetGrid(self.df, col="forma_boala", hue="stare_externare")
-        f.map(plt.scatter, "Zile_spitalizare", "zile_ATI", alpha=0.7)
-        f.add_legend()
-        plt.xlim(0, 100)
-        plt.show()
-
-        h = {0: 'blue', 1: 'green'}
-        i = {"marker": ["^", "v"]}
-        f = sns.FacetGrid(self.df, row="stare_externare", col="forma_boala", hue="Sex", margin_titles=True,
-                          gridspec_kws={"width_ratios": [2, 4, 4]}, palette=h, hue_kws=i)
-        f.map(sns.regplot, "Zile_spitalizare", "zile_ATI", fit_reg=False)
-        f.add_legend()
-        plt.show()
-
-        f = sns.FacetGrid(self.df, col="stare_externare", col_wrap=2)
-        f.map(sns.barplot, "Sex", "Zile_spitalizare", color="#9FC2E9", edgecolor="blue", lw=.5)
-        f.fig.subplots_adjust(wspace=1, hspace=0.5)
-        plt.show()
-
-        f = sns.FacetGrid(self.df, col="stare_externare", col_wrap=2)
-        f.map(sns.barplot, "forma_boala", "Zile_spitalizare", color="#9FC2E9", edgecolor="blue", lw=.5)
-        f.set_axis_labels("1-Usor, 2-Moderat, 3-Sever", "Zile petrecute in spital")
-        f.set(yticks=[0, 5, 10, 20])
-        f.set(xlim=(-1, 3), ylim=(0, 20))
-        plt.show()
-
-    def plt7(self):
-        g = sns.PairGrid(self.df, vars=["Zile_spitalizare", "zile_ATI", "Varsta"], hue="forma_boala")
-        # g.map(plt.scatter)
-        # g.map_diag(sns.histplot)
-        # g.map_offdiag(sns.scatterplot)
-        g.map_upper(sns.scatterplot, size=self.df["Sex"])
-        g.map_lower(sns.kdeplot)
-        g.map_diag(sns.kdeplot)
-        g.add_legend(title="", adjust_subtitles=True)
-        plt.show()
-
-        g = sns.PairGrid(self.df, x_vars=["Zile_spitalizare", "zile_ATI"], y_vars=["Varsta"], hue="forma_boala",
-                         hue_kws={"marker": ["^", "v", "^"]})
-        g.map(plt.scatter)
-        g.add_legend(title="", adjust_subtitles=True)
-        plt.show()
-
-    def plt8(self):
-        plt.subplots(figsize=(15, 5))
-        sns.distplot(self.df["Varsta"], bins=20, kde=True, rug=False)
-        plt.show()
-
-        sns.jointplot(x="Varsta", y='Zile_spitalizare', data=self.df, size=8)
-        plt.show()
-
-        sns.pairplot(data=self.df, size=5, aspect=0.5, x_vars=["Zile_spitalizare", "zile_ATI"],
-                     y_vars=["forma_boala", "stare_externare"], kind="reg", hue='Sex')
-        plt.show()
-
-    def plt9(self):
-        sns.set()
-        sns.set_style("darkgrid")
-        sns.set_style("ticks")
-        sns.displot(self.df["Zile_spitalizare"], kde=True)
-        # sns.despine(left=True, right=False, bottom=True, top=False)
-        sns.despine(offset=5, trim=False)
-        plt.xlabel("Zile la spitalizare")
-        plt.ylabel("")
-        plt.show()
-
-        sns.set_palette("Greens_d")
-        sns.displot(self.df["Zile_spitalizare"], kde=True)
-        plt.show()
-
-        sns.palplot(sns.color_palette("hls", 12))
-        plt.show()
-
-        sns.palplot(sns.hls_palette(10, h=0.5, l=0.8, s=0.6))
-        plt.show()
-
-        sns.palplot(sns.color_palette("Blues_d"))
-        plt.show()
-
-        cmap = sns.light_palette("green", as_cmap=True, reverse=True)
-        sns.kdeplot(self.df["Varsta"], self.df["Zile_spitalizare"], cmap=cmap)
-        plt.ylim(-5, 50)
-        plt.show()
-
-        sns.set_style("dark")
-        sns.set_context("talk")
-        f, ax = plt.subplots(figsize=(10, 8))
-        cmap = sns.cubehelix_palette(as_cmap=True, dark=1, light=0, reverse=True)
-        sns.kdeplot(self.df["zile_ATI"], self.df["Zile_spitalizare"], ax=ax, cmap=cmap, shade=True)
-        plt.ylim(-5, 50)
-        plt.xlim(-7, 30)
-        plt.xlabel("Zile pertecute la ATI")
-        plt.ylabel("Zile spitalizare")
-        plt.show()
-
-    def plt10(self):
-        self.df[['Zile_spitalizare', 'zile_ATI']].boxplot(figsize=(12, 8))
-        plt.title("Zile de spitalizare si zile petrecute la ATI")
-        plt.show()
-
-        self.df.boxplot(column=['Varsta'], by=['stare_externare'], figsize=(12, 8), color='red')
-        plt.show()
-
-        forma_df = self.df.groupby('forma_boala', as_index=False).mean().round(3)
-        print(forma_df)
-        forma_df.plot.bar(x='Zile_spitalizare', y='Varsta', figsize=(12, 14), color=['C0', 'C1', 'C3'],
-                          legend=False)
-        plt.show()
-
-    def plt11(self):
-        print(np.corrcoef(self.df.Zile_spitalizare, self.df.zile_ATI))
-        print(pearsonr(self.df.Zile_spitalizare, self.df.zile_ATI))
-        print(spearmanr(self.df.Zile_spitalizare, self.df.zile_ATI))
-
-        plt.figure(figsize=(12, 8))
-        plt.scatter(self.df.Zile_spitalizare, self.df.zile_ATI, color='C1')
         plt.show()
 
 
