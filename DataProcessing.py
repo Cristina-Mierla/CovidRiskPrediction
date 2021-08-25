@@ -1,19 +1,23 @@
-import model
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import seaborn as sns
-import missingno as msno
 from scipy.stats import pearsonr, spearmanr
 import csv
 
+sns.set()
+pd.set_option('display.max_rows', 500)
+pd.set_option('display.max_columns', 500)
+pd.set_option('display.width', 1000)
 
 class DataProcessing:
 
     def __init__(self, dataset_name):
         self.dataset = pd.read_csv(dataset_name, parse_dates=True)
         self.df = pd.DataFrame(self.dataset)
+
+        self.scales_dataset = self.dataset
 
         self.boala = None
 
@@ -215,6 +219,7 @@ class DataProcessing:
         Creates a dictionary with every illness and how many people had each type of severity.
         :returns: DataFrame
         """
+        self.com_ext = self.df[["Comorbiditati", "stare_externare"]]
         d = {}
         g = open("text-comorbiditati.txt", "r")
         r = csv.reader(g)
@@ -239,12 +244,18 @@ class DataProcessing:
             inplace=True, errors="raise")
         return self.boala
 
+    def scale_data(self):
+        pass
+
     '''
     Plotting functions
     '''
     def plt_data_distribution(self):
+        sns.set_palette("Purples_r")
+
         sns.displot(self.df.Zile_spitalizare, kde=True, rug=True, bins=100)
-        # sns.displot(self.df.zile_ATI, kde=True)
+        plt.title("Distributia zilelor de spitalizare")
+        plt.xlabel("Zile spitalizare")
         plt.show()
 
         plt.subplots(figsize=(13, 5))
@@ -254,14 +265,24 @@ class DataProcessing:
         plt.title("Distributia zilelor de spitalizare")
         plt.show()
 
-        sns.kdeplot(self.df.stare_externare, data=self.df, shade=True, color='b', hue='Sex')
+        sns.kdeplot(self.df.stare_externare, data=self.df, shade=True, hue='Sex', label=['femeie', 'barbat'])
+        plt.xlabel("Stare de externare")
+        plt.ylabel("Count")
+        plt.title("Distributia starilor de externare in functie de sex")
         plt.show()
 
-        sns.kdeplot(self.df.Varsta, data=self.df, shade=True, color='r', hue='Sex')
+        sns.kdeplot(self.df.Varsta, data=self.df, shade=True, hue='Sex', label=['femeie', 'barbat'])
+        plt.title("Distributia varstei in functie de sex")
         plt.show()
 
-        plt.subplots(figsize=(15, 5))
-        sns.distplot(self.df["Varsta"], bins=20, kde=True, rug=False)
+        plt.subplots(figsize=(13, 5))
+        sns.distplot(self.df["Varsta"], bins=25, kde=True, rug=False)
+        plt.title('Distributia varstei')
+        plt.show()
+
+        plt.subplots(figsize=(13, 5))
+        sns.distplot(self.df["Zile_spitalizare"], bins=25, kde=True, rug=False)
+        plt.title('Distributia zilelor de spitalizare')
         plt.show()
 
         sns.jointplot(x='stare_externare', y='Zile_spitalizare', data=self.df)
@@ -269,11 +290,8 @@ class DataProcessing:
         plt.ylabel("Zile de spitalizare")
         plt.show()
 
-        sns.jointplot(x="Varsta", y='Zile_spitalizare', data=self.df, size=8)
-        plt.show()
-
         with sns.axes_style('white'):
-            sns.jointplot(x="Varsta", y='Zile_spitalizare', data=self.df, kind='hex', color='k')
+            sns.jointplot(x="Varsta", y='Zile_spitalizare', data=self.df, kind='hex')
             plt.show()
 
         sns.stripplot(data=self.df, x='stare_externare', y='Varsta', jitter=True, marker='.')
@@ -281,28 +299,37 @@ class DataProcessing:
         plt.title("Cate valori sunt pentru fiecare stare de externare, distribuite pe varsta")
         plt.show()
 
-        f = sns.FacetGrid(self.df, col="stare_externare")
-        f.map(plt.hist, "Zile_spitalizare")
-        plt.xlim(0, 45)
-        plt.show()
+        with sns.color_palette("Purples"):
+            f = sns.FacetGrid(self.df, col="stare_externare")
+            f.map(plt.hist, "Zile_spitalizare")
+            plt.legend(title='')
+            plt.xlabel('Zile spitalizare')
+            plt.ylabel('Zile ATI')
+            plt.xlim(0, 45)
+            plt.show()
 
         f = sns.FacetGrid(self.df, col="forma_boala", hue="stare_externare")
         f.map(plt.scatter, "Zile_spitalizare", "zile_ATI", alpha=0.5, marker='.')
         f.add_legend()
-        plt.xlim(0, 100)
+        plt.title("Zilele petrecute in spitalizare si ATI reportate la forma de boala")
+        plt.xlabel('Zile spitalizare')
+        plt.ylabel('Zile ATI')
+        plt.xlim(0, 70)
         plt.show()
 
         g = sns.PairGrid(self.df, vars=["Zile_spitalizare", "zile_ATI", "Varsta"], hue="forma_boala")
         # g.map(plt.scatter)
         # g.map_diag(sns.histplot)
         # g.map_offdiag(sns.scatterplot)
-        g.map_upper(sns.scatterplot, size=self.df["Sex"])
+        g.map_upper(sns.scatterplot, size=self.df["Sex"], alpha=0.5)
         g.map_lower(sns.kdeplot)
         g.map_diag(sns.kdeplot)
         g.add_legend(title="", adjust_subtitles=True)
         plt.show()
 
     def plt_stare_externare(self):
+        sns.set_palette("Purples_r")
+
         data_vindecat = self.df[self.df["stare_externare"] == 0]
         data_decedat = self.df[self.df["stare_externare"] == 4]
         data_ameliorat = self.df[self.df["stare_externare"] == 1]
@@ -317,11 +344,12 @@ class DataProcessing:
         ati_decedat = data_decedat["zile_ATI"]
 
         plt.plot(varsta_vindecat, spitalizare_vindecat, ".")
-        plt.plot(varsta_ameliorat, spitalizare_ameliorat, ".")
-        plt.plot(varsta_decedat, spitalizare_decedat, ".")
+        plt.plot(varsta_ameliorat, spitalizare_ameliorat, ".", alpha=0.5)
+        plt.plot(varsta_decedat, spitalizare_decedat, ".", alpha=0.5)
         plt.xlabel('Varsta')
         plt.ylabel('Zile de spitalizare')
         plt.legend(["Vindecat", "Ameliorat", "Decedat"])
+        plt.title('Zilele de spitalizare pe varsta in functie de starea de externare')
         plt.show()
 
         plt.plot(varsta_vindecat, ati_vindecat, ".")
@@ -341,6 +369,7 @@ class DataProcessing:
         patch1 = mpatches.Patch(color='green', label='Vindecat')
         patch2 = mpatches.Patch(color='orange', label='Decedat')
         plt.legend(handles=[patch1, patch2])
+        plt.title("Zilele de spitalizare in functie de varsta")
         plt.show()
 
 
