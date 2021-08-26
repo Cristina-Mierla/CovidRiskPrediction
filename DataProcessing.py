@@ -253,11 +253,6 @@ class DataProcessing:
     def plt_data_distribution(self):
         sns.set_palette("Purples_r")
 
-        sns.displot(self.df.Zile_spitalizare, kde=True, rug=True, bins=100)
-        plt.title("Distributia zilelor de spitalizare")
-        plt.xlabel("Zile spitalizare")
-        plt.show()
-
         plt.subplots(figsize=(13, 5))
         sns.countplot(data=self.df, x='Zile_spitalizare')
         plt.xticks(rotation=90)
@@ -275,13 +270,19 @@ class DataProcessing:
         plt.title("Distributia varstei in functie de sex")
         plt.show()
 
-        plt.subplots(figsize=(13, 5))
+        sns.kdeplot(self.df.Zile_spitalizare, data=self.df, shade=True, hue='Sex', label=['femeie', 'barbat'])
+        plt.xlabel("Zile de spitalizare")
+        plt.ylabel("Count")
+        plt.title("Distributia starilor de externare in functie de sex")
+        plt.show()
+
+        plt.subplots(figsize=(12, 5))
         sns.distplot(self.df["Varsta"], bins=25, kde=True, rug=False)
         plt.title('Distributia varstei')
         plt.show()
 
-        plt.subplots(figsize=(13, 5))
-        sns.distplot(self.df["Zile_spitalizare"], bins=25, kde=True, rug=False)
+        plt.subplots(figsize=(12, 5))
+        sns.distplot(self.df["Zile_spitalizare"], bins=70, kde=True, rug=False)
         plt.title('Distributia zilelor de spitalizare')
         plt.show()
 
@@ -299,23 +300,17 @@ class DataProcessing:
         plt.title("Cate valori sunt pentru fiecare stare de externare, distribuite pe varsta")
         plt.show()
 
-        with sns.color_palette("Purples"):
-            f = sns.FacetGrid(self.df, col="stare_externare")
-            f.map(plt.hist, "Zile_spitalizare")
-            plt.legend(title='')
-            plt.xlabel('Zile spitalizare')
-            plt.ylabel('Zile ATI')
-            plt.xlim(0, 45)
-            plt.show()
-
-        f = sns.FacetGrid(self.df, col="forma_boala", hue="stare_externare")
-        f.map(plt.scatter, "Zile_spitalizare", "zile_ATI", alpha=0.5, marker='.')
-        f.add_legend()
-        plt.title("Zilele petrecute in spitalizare si ATI reportate la forma de boala")
-        plt.xlabel('Zile spitalizare')
-        plt.ylabel('Zile ATI')
-        plt.xlim(0, 70)
+        f = sns.FacetGrid(self.df, col="stare_externare")
+        f.map(plt.hist, "Zile_spitalizare")
+        plt.xlim(0, 45)
         plt.show()
+
+        with sns.color_palette("Purples"):
+            f = sns.FacetGrid(self.df, col="forma_boala", hue="stare_externare")
+            f.map(plt.scatter, "Zile_spitalizare", "zile_ATI", alpha=0.5, marker='.')
+            f.add_legend()
+            plt.xlim(0, 70)
+            plt.show()
 
         g = sns.PairGrid(self.df, vars=["Zile_spitalizare", "zile_ATI", "Varsta"], hue="forma_boala")
         # g.map(plt.scatter)

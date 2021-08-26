@@ -3,42 +3,7 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
-        <entry key="\data-analize.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data-analize_coloane.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data-comorbiditati.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data-comorbiditati_coloane.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data-comorbiditati_externare.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\data-medicatie.csv">
+        <entry key="C:\Users\mierl\PycharmProjects\ACCNDataVisualization\data-comorbiditati_externare.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -56,13 +21,6 @@
           <value>
             <Attribute>
               <option name="separator" value="|" />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\diabetes.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>

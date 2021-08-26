@@ -74,7 +74,7 @@ class Model:
 
         # split training and test data
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=1 / 3,
-                                                                                random_state=42)
+                                                                                random_state=56)
 
         self.X_train = sc_X.fit_transform(self.X_train)
         self.X_test = sc_X.transform(self.X_test)
@@ -98,7 +98,7 @@ class Model:
         #           ('FOREST', RandomForestClassifier()), ('BAYES', GaussianNB()), ('ADA', AdaBoostClassifier()),
         #           ('SVC', SVC()), ('NEURONAL', MLPClassifier())]
         models = [('LOGREG', LogisticRegression()), ('RF', RandomForestClassifier()), ('KNN', KNeighborsClassifier()),
-                  ('SVM', SVC()),
+                  ('SVM', SVC()), ('TREECLASS', DecisionTreeClassifier()), ('ADA', AdaBoostClassifier()),
                   ('GNB', GaussianProcessClassifier()), ('MLP', MLPClassifier())]
         # , ('CART', DecisionTreeRegressor()), ('TREECLASS', DecisionTreeClassifier()),
         # models = [('LOGREG', LogisticRegression()), ('RF', RandomForestClassifier()), ('SVM', SVC()), ('KNN', KNeighborsClassifier())]
@@ -106,8 +106,9 @@ class Model:
         results = []
         names = []
         scoring = ['accuracy', 'precision_weighted', 'recall_weighted', 'f1_weighted']
-        # target_names = ['forma_boala']
-        target_names = ['0', '1', '2', '4']
+        # target_names = ['Usor', 'Moderat', 'Sever'] # forma boala
+        # target_names = ['Vindecat', 'Ameliorat', 'Stationar', 'Decedat']
+        target_names = ['Vindecat', 'Ameliorat', 'Stationar', 'Agravat', 'Decedat'] # stare externare
 
         # for name, model in models:
         #     kfold = KFold(n_splits=10, random_state=7, shuffle=True)
