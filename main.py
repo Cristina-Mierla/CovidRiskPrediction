@@ -11,14 +11,10 @@ prediction_model = Model()
 
 @app.route('/medical-record', methods=['POST', 'GET'])
 def get_med_rec():
-    pregnancies = None
-    glucose = None
-    bldpressure = None
-    skinthick = None
-    insulin = None
-    bmi = None
-    pedigree = None
     age = None
+    diagnos_int = None
+    sex = None
+
     # daca exista si e json
     if request:
 
@@ -50,14 +46,11 @@ def get_med_rec():
 
         form = request.form
 
-        pregnancies = json.loads(form["DiabetPred"])["Pregnancies"]
-        glucose = json.loads(form["DiabetPred"])["Glucose"]
-        bldpressure = json.loads(form["DiabetPred"])["BloodPressure"]
-        skinthick = json.loads(form['DiabetPred'])["SkinThickness"]
-        insulin = json.loads(form['DiabetPred'])["Insulin"]
-        bmi = json.loads(form['DiabetPred'])["BMI"]
-        pedigree = json.loads(form['DiabetPred'])["DiabetesPedigreeFunction"]
-        age = json.loads(form['DiabetPred'])["Age"]
+        age = json.loads(form["RiskPred"])["Age"]
+        sex = json.loads(form["RiskPred"])["Gender"]
+        diagnos_int = json.loads(form["RiskPred"])["Admission_diagnostic"]
+
+        # save the input
 
 
 

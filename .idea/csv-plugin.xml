@@ -3,6 +3,13 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
+        <entry key="C:\Users\mierl\PycharmProjects\ACCNDataVisualization\data-analize.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="C:\Users\mierl\PycharmProjects\ACCNDataVisualization\data-comorbiditati_externare.csv">
           <value>
             <Attribute>
