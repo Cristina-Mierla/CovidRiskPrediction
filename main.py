@@ -56,14 +56,21 @@ def get_med_rec():
         ati = json.loads(form["RiskPred"])["ATI"]
         analize = json.loads(form['RiskPred'])['Analyzes']
 
-        # save the input
+        prediction_data = [age, sex, diagnos_int, spitalizare, ati, analize]
 
+        prediction_result, prediction_percentage = prediction_model.predict(prediction_data)
 
+        label = {0: 'Vindecat', 1: 'Ameliorat', 2: 'Stationar', 3: 'Agravat', 4: 'Decedat'}
 
-        # return "JSON was received and the prediction was -> {}".format(prediction[0]), 200
-        if 1:
-            return "The patient has a high risk of diabetes", 200
-        return "The patient has a low risk of diabetes", 200
+        result = "The patient has a high chance to be release as: {}\n\n".format(label[prediction_result[0]])
+
+        for i in range(0, 5):
+            aux = "\t{:20} -> {}%\n".format(label[i], round(prediction_percentage[0][i]*100, 0))
+            result = result + aux
+
+        print(result)
+
+        return result, 200
 
     else:
 

@@ -41,7 +41,16 @@ class DataProcessing:
         #  "Proceduri_Radiologie", "tip_externare", "unde_pleaca", "Diag_pr_ext"]
         # self.data = [[self.__preg, self.__gluc, self.__blpr, self.__skth, self.__insu, self.__bmi, self.__pedi, self.__age]]
 
-    def predict(self, age, sex, diag_init, zile_spit, zile_ati, analize):
+    def predict(self, prediction_data):
+        # prediction_data = [age, sex, diagnos_int, spitalizare, ati, analize]
+
+        age = prediction_data[0]
+        sex = prediction_data[1]
+        diag_init = prediction_data[2]
+        zile_spit = prediction_data[3]
+        zile_ati = prediction_data[4]
+        analize = prediction_data[5]
+
         print("\n\tPREDICTION\n")
         # newdataset = self.df.drop(["Sex", "Varsta", "Zile_spitalizare", "zile_ATI", "Diag_pr_int", 'Analize_prim_set', "Comorbiditati", "Diag_pr_ext", "stare_externare", "forma_boala"], axis=0, inplace=False)
         newdataset = self.df.drop(

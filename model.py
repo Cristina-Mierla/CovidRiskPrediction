@@ -65,8 +65,6 @@ class Model:
 
         self.train()
 
-        self.predict()
-
         # self.plot_data()
         # self.model = pickle.load(open('model.pkl', 'rb'))
 
@@ -82,9 +80,9 @@ class Model:
 
         oversample = ADASYN()
         self.X, self.y = oversample.fit_resample(self.X, self.y)
-
-        rus = RandomUnderSampler(random_state=0)
-        rus.fit(self.X, self.y)
+        #
+        # rus = RandomUnderSampler(random_state=0)
+        # rus.fit(self.X, self.y)
 
         # split training and test data
         # self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=1 / 3,
@@ -227,34 +225,19 @@ class Model:
         print("Best Score:" + str(knn_cv.best_score_))
         print("Best Parameters: " + str(knn_cv.best_params_))
 
-    def predict(self):
+    def predict(self, prediction_data):
+        # prediction_data = [age, sex, diagnos_int, spitalizare, ati, analize]
         # print("Prediction accuracy -> {} %".format(self.accuracy * 100))
-        prediction_set = self.data_process.predict(45, "Female", "J06.9", 10, 0,
-                                  "ASAT/GOT - 39 U/l) (0 - 31) || ALAT/GPT - 38 U/L) (0 - 34) || Creatinina - 0.83 mg/dl) "
-                                  "(0.51 - 0.95) || CK-MB  * - 34 U/L) (0 - 25 ) || LDH - 633 U/L) (0 - 450) || CK - 158 U/L)"
-                                  " (0 - 145) || Proteina C reactiva - 21 mg/L) (0 - 10)")
+
+        # self.model = pickle.load(open('model.pkl', 'rb'))
+
+        prediction_set = self.data_process.predict(prediction_data)
         output1 = self.model.predict(prediction_set)
         print(output1)
         output2 = self.model.predict_proba(prediction_set)
         print(output2)
 
-
-        # self.model = pickle.load(open('model.pkl', 'rb'))
-        # output = self.model.predict(data)
-        # print(data, output)
-        # data = data[0]
-        # record = {
-        #     "Pregnancies": [data[0]],
-        #     "Glucose": [data[1]],
-        #     "BloodPressure": [data[2]],
-        #     "SkinThickness": [data[3]],
-        #     "Insulin": [data[4]],
-        #     "BMI": [data[5]],
-        #     "DiabetesPedigreeFunction": [data[6]],
-        #     "Age": [data[7]],
-        #     "Outcome": [output[0]]
-        # }
-        # df = pd.DataFrame(record)
-        # # df.to_csv('dataset_cop.csv', mode='a', index=False, header=False)
+        # df.to_csv('dataset_cop.csv', mode='a', index=False, header=False)
         # pickle.dump(self.model, open('model.pkl', 'wb'))
-        # return output
+
+        return output1, output2
