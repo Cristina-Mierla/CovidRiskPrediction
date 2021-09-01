@@ -14,6 +14,9 @@ def get_med_rec():
     age = None
     diagnos_int = None
     sex = None
+    spitalizare = None
+    ati = None
+    analize = None
 
     # daca exista si e json
     if request:
@@ -49,6 +52,9 @@ def get_med_rec():
         age = json.loads(form["RiskPred"])["Age"]
         sex = json.loads(form["RiskPred"])["Gender"]
         diagnos_int = json.loads(form["RiskPred"])["Admission_diagnostic"]
+        spitalizare = json.loads(form["RiskPred"])["Hospitalization"]
+        ati = json.loads(form["RiskPred"])["ATI"]
+        analize = json.loads(form['RiskPred'])['Analyzes']
 
         # save the input
 

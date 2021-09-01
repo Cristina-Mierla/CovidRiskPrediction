@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from imblearn.over_sampling import SMOTE, BorderlineSMOTE
+from imblearn.over_sampling import SMOTE, BorderlineSMOTE, SMOTENC, ADASYN
+from imblearn.under_sampling import RandomUnderSampler
 # from mlxtend.plotting import plot_decision_regions
 from pandas.plotting import andrews_curves
 from sklearn import metrics
@@ -40,14 +41,11 @@ class Model:
     def __init__(self):  # param csv_name
         print("\n\t\tTraining and Testing Prediction Models\n")
         self.csv_name = 'dataset.csv'
-        dataset = pd.read_csv(self.csv_name, parse_dates=True)
-        data_process = DataProcessing(dataset)
-        self.dataset = data_process.get_dataset()
+        self.dataset = pd.read_csv(self.csv_name, parse_dates=True)
+        self.data_process = DataProcessing(self.dataset)
+        self.dataset = self.data_process.get_dataset()
         # self.dataset = pd.read_csv(csv_name)
         self.scaled_dataset = self.dataset  # copy of the data set
-
-        data_process.predict(45, "Female", "N17.9", 10, 3,
-                             "ASAT/GOT - 39 U/l) (0 - 31) || ALAT/GPT - 38 U/L) (0 - 34) || Creatinina - 0.83 mg/dl) (0.51 - 0.95) || CK-MB  * - 34 U/L) (0 - 25 ) || LDH - 633 U/L) (0 - 450) || CK - 158 U/L) (0 - 145) || Proteina C reactiva - 21 mg/L) (0 - 10)")
 
         self.y = pd.DataFrame()
         self.X = pd.DataFrame()
@@ -63,11 +61,11 @@ class Model:
 
         self.accuracy = 0
 
-        # self.scale_data()
-
-        self.test_models()
+        # self.test_models()
 
         self.train()
+
+        self.predict()
 
         # self.plot_data()
         # self.model = pickle.load(open('model.pkl', 'rb'))
@@ -79,11 +77,14 @@ class Model:
         sc_X = StandardScaler()
         print(self.scaled_dataset)
         self.X = pd.DataFrame(
-            sc_X.fit_transform(self.scaled_dataset.drop(["stare_externare"], axis=1), ))
+            sc_X.fit_transform(self.scaled_dataset.drop(["stare_externare", "forma_boala"], axis=1), ))
         self.y = self.scaled_dataset[["stare_externare"]]
 
-        oversample = BorderlineSMOTE()
+        oversample = ADASYN()
         self.X, self.y = oversample.fit_resample(self.X, self.y)
+
+        rus = RandomUnderSampler(random_state=0)
+        rus.fit(self.X, self.y)
 
         # split training and test data
         # self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=1 / 3,
@@ -139,8 +140,6 @@ class Model:
 
         final = pd.concat(dfs, ignore_index=True)
 
-
-
     def train(self):
         self.scale_data()
 
@@ -155,10 +154,10 @@ class Model:
         names = []
         scoring = ['accuracy', 'precision_weighted', 'recall_weighted', 'f1_weighted']
 
-        model = DecisionTreeClassifier()
+        self.model = DecisionTreeClassifier()
         kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=90210)
-        cv_results = cross_validate(model, self.X_train, self.y_train, cv=kfold, scoring=scoring)
-        clf = model.fit(self.X_train, self.y_train)
+        cv_results = cross_validate(self.model, self.X_train, self.y_train, cv=kfold, scoring=scoring)
+        clf = self.model.fit(self.X_train, self.y_train)
         y_pred = clf.predict(self.X_valid)
         print("Decision Tree")
         print(classification_report(self.y_valid, y_pred, target_names=target_names))
@@ -228,24 +227,34 @@ class Model:
         print("Best Score:" + str(knn_cv.best_score_))
         print("Best Parameters: " + str(knn_cv.best_params_))
 
-    def predict(self, data):
+    def predict(self):
         # print("Prediction accuracy -> {} %".format(self.accuracy * 100))
-        self.model = pickle.load(open('model.pkl', 'rb'))
-        output = self.model.predict(data)
-        print(data, output)
-        data = data[0]
-        record = {
-            "Pregnancies": [data[0]],
-            "Glucose": [data[1]],
-            "BloodPressure": [data[2]],
-            "SkinThickness": [data[3]],
-            "Insulin": [data[4]],
-            "BMI": [data[5]],
-            "DiabetesPedigreeFunction": [data[6]],
-            "Age": [data[7]],
-            "Outcome": [output[0]]
-        }
-        df = pd.DataFrame(record)
-        # df.to_csv('dataset_cop.csv', mode='a', index=False, header=False)
-        pickle.dump(self.model, open('model.pkl', 'wb'))
-        return output
+        prediction_set = self.data_process.predict(45, "Female", "J06.9", 10, 0,
+                                  "ASAT/GOT - 39 U/l) (0 - 31) || ALAT/GPT - 38 U/L) (0 - 34) || Creatinina - 0.83 mg/dl) "
+                                  "(0.51 - 0.95) || CK-MB  * - 34 U/L) (0 - 25 ) || LDH - 633 U/L) (0 - 450) || CK - 158 U/L)"
+                                  " (0 - 145) || Proteina C reactiva - 21 mg/L) (0 - 10)")
+        output1 = self.model.predict(prediction_set)
+        print(output1)
+        output2 = self.model.predict_proba(prediction_set)
+        print(output2)
+
+
+        # self.model = pickle.load(open('model.pkl', 'rb'))
+        # output = self.model.predict(data)
+        # print(data, output)
+        # data = data[0]
+        # record = {
+        #     "Pregnancies": [data[0]],
+        #     "Glucose": [data[1]],
+        #     "BloodPressure": [data[2]],
+        #     "SkinThickness": [data[3]],
+        #     "Insulin": [data[4]],
+        #     "BMI": [data[5]],
+        #     "DiabetesPedigreeFunction": [data[6]],
+        #     "Age": [data[7]],
+        #     "Outcome": [output[0]]
+        # }
+        # df = pd.DataFrame(record)
+        # # df.to_csv('dataset_cop.csv', mode='a', index=False, header=False)
+        # pickle.dump(self.model, open('model.pkl', 'wb'))
+        # return output

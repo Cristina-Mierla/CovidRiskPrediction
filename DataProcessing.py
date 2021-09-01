@@ -11,13 +11,14 @@ pd.set_option('display.max_rows', 500)
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 
+
 class DataProcessing:
 
-    def __init__(self, dataset_name):
-        self.dataset = pd.read_csv(dataset_name, parse_dates=True)
+    def __init__(self, dataset):
+        self.dataset = dataset
         self.df = pd.DataFrame(self.dataset)
 
-        self.scales_dataset = self.dataset
+        self.copy_dataset = self.dataset
 
         self.boala = None
 
@@ -35,7 +36,55 @@ class DataProcessing:
         self.spitalizare = self.df["Zile_spitalizare"]
         self.diagnos_int = self.df["Diag_pr_int"]
         self.com_ext = self.df[["Comorbiditati", "stare_externare"]]
+        # ["Sex", "Varsta", "Zile_spitalizare", "zile_ATI", "Diag_pr_int", 'Analize_prim_set', "Comorbiditati", "AN", "precod", "FO",
+        #  "Data_Examinare_Radiologie", "stare_externare", "forma_boala",  "Radiologie", "rezultat_radiologie", "Proceduri",
+        #  "Proceduri_Radiologie", "tip_externare", "unde_pleaca", "Diag_pr_ext"]
         # self.data = [[self.__preg, self.__gluc, self.__blpr, self.__skth, self.__insu, self.__bmi, self.__pedi, self.__age]]
+
+    def predict(self, age, sex, diag_init, zile_spit, zile_ati, analize):
+        print("\n\tPREDICTION\n")
+        # newdataset = self.df.drop(["Sex", "Varsta", "Zile_spitalizare", "zile_ATI", "Diag_pr_int", 'Analize_prim_set', "Comorbiditati", "Diag_pr_ext", "stare_externare", "forma_boala"], axis=0, inplace=False)
+        newdataset = self.df.drop(
+            range(1, self.df.shape[0]), axis=0, inplace=False)
+        newdataset = newdataset.drop(["stare_externare", "forma_boala"], axis='columns')
+        for column in newdataset.columns:
+            newdataset[column] = 0
+
+        newsex = 0
+        if sex == 'Female':
+            newsex = 0
+        else:
+            newsex = 1
+        diag = self.comorbiditati[diag_init]
+
+        analize_list = analize.split(" || ")
+        for analiza in analize_list:
+            analiza_name, rest = analiza.split(" - ", 1)
+            result, ignore = rest.split(" ", 1)
+            result = result.replace("<", "")
+            analiza_name = analiza_name.replace(" ", "")
+            try:
+                result_int = float(result)
+                try:
+                    newdataset[analiza_name][0] = result_int
+                except:
+                    newdataset[analiza_name] = np.zeros(self.df.shape[0], dtype=int)
+                    newdataset[analiza_name][0] = result_int
+                    pd.to_numeric(newdataset[analiza_name])
+            except:
+                pass
+
+        newdataset["Comorbiditati"][0] = self.df["Comorbiditati"].mean()
+        newdataset["Varsta"][0] = age
+        newdataset["Sex"][0] = newsex
+        newdataset["Diag_pr_int"][0] = diag
+        newdataset["Diag_pr_ext"][0] = 0
+        newdataset["Zile_spitalizare"][0] = zile_spit
+        newdataset["zile_ATI"][0] = zile_ati
+
+        print(newdataset)
+
+        return newdataset
 
     def get_dataset(self):
         return self.df
