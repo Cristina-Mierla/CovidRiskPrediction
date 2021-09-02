@@ -23,30 +23,6 @@ def get_med_rec():
 
         # request_data = request.get_json()
 
-        # if 'Pregnancies' in request_data:
-        #     pregnancies = request_data["Pregnancies"]
-        #
-        # if 'Glucose' in request_data:
-        #     glucose = request_data["Glucose"]
-        #
-        # if 'BloodPressure' in request_data:
-        #     bldpressure = request_data["BloodPressure"]
-        #
-        # if 'SkinThickness' in request_data:
-        #     skinthick = request_data['SkinThickness']
-        #
-        # if 'Insulin' in request_data:
-        #     insulin = request_data['Insulin']
-        #
-        # if 'BMI' in request_data:
-        #     bmi = request_data['BMI']
-        #
-        # if 'DiabetesPedigreeFunction' in request_data:
-        #     pedigree = request_data['DiabetesPedigreeFunction']
-        #
-        # if 'Age' in request_data:
-        #     age = request_data['Age']
-
         form = request.form
 
         age = json.loads(form["RiskPred"])["Age"]
@@ -55,8 +31,9 @@ def get_med_rec():
         spitalizare = json.loads(form["RiskPred"])["Hospitalization"]
         ati = json.loads(form["RiskPred"])["ATI"]
         analize = json.loads(form['RiskPred'])['Analyzes']
+        comorb = json.loads(form['RiskPred'])['Comorbidities']
 
-        prediction_data = [age, sex, diagnos_int, spitalizare, ati, analize]
+        prediction_data = [age, sex, diagnos_int, spitalizare, ati, analize, comorb]
 
         prediction_result, prediction_percentage = prediction_model.predict(prediction_data)
 

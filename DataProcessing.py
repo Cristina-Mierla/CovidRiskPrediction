@@ -50,6 +50,7 @@ class DataProcessing:
         zile_spit = prediction_data[3]
         zile_ati = prediction_data[4]
         analize = prediction_data[5]
+        comorb = prediction_data[6]
 
         print("\n\tPREDICTION\n")
         # newdataset = self.df.drop(["Sex", "Varsta", "Zile_spitalizare", "zile_ATI", "Diag_pr_int", 'Analize_prim_set', "Comorbiditati", "Diag_pr_ext", "stare_externare", "forma_boala"], axis=0, inplace=False)
@@ -83,7 +84,12 @@ class DataProcessing:
             except:
                 pass
 
-        newdataset["Comorbiditati"][0] = self.df["Comorbiditati"].mean()
+        newcomorb = 0
+        comorb_list = comorb.split(",")
+        for comb in comorb_list:
+            newcomorb += self.comorbiditati[comb]
+
+        newdataset["Comorbiditati"][0] = newcomorb
         newdataset["Varsta"][0] = age
         newdataset["Sex"][0] = newsex
         newdataset["Diag_pr_int"][0] = diag
