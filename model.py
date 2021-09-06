@@ -69,7 +69,9 @@ class Model:
 
         self.pre_pruning()
 
-        self.plot_model()
+        self.post_pruning()
+
+        # self.plot_model()
         # self.model = pickle.load(open('model.pkl', 'rb'))
 
         # data_process.plt_data_distribution()
@@ -156,7 +158,7 @@ class Model:
         names = []
         scoring = ['accuracy', 'precision_weighted', 'recall_weighted', 'f1_weighted']
 
-        self.model = DecisionTreeClassifier()
+        self.model = DecisionTreeClassifier(ccp_alpha=0.013)
         kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=90210)
         cv_results = cross_validate(self.model, self.X_train, self.y_train, cv=kfold, scoring=scoring)
         clf = self.model.fit(self.X_train, self.y_train)
@@ -180,6 +182,48 @@ class Model:
 
         self.model = gcv.best_estimator_
         self.model.fit(self.X_train, self.y_train)
+
+    def post_pruning(self):
+        path = self.model.cost_complexity_pruning_path(self.X_train, self.y_train)
+        ccp_alphas, impurities = path.ccp_alphas, path.impurities
+
+        clfs = []
+        for ccp_alpha in ccp_alphas:
+            clf = tree.DecisionTreeClassifier(random_state=0, ccp_alpha=ccp_alpha)
+            clf.fit(self.X_train, self.y_train)
+            clfs.append(clf)
+
+        clfs = clfs[:-1]
+        ccp_alphas = ccp_alphas[:-1]
+        node_counts = [clf.tree_.node_count for clf in clfs]
+        depth = [clf.tree_.max_depth for clf in clfs]
+        plt.scatter(ccp_alphas, node_counts)
+        plt.scatter(ccp_alphas, depth)
+        plt.plot(ccp_alphas, node_counts, label='no of nodes', drawstyle="steps-post")
+        plt.plot(ccp_alphas, depth, label='depth', drawstyle="steps-post")
+        plt.legend()
+        plt.show()
+
+        train_acc = []
+        test_acc = []
+        for c in clfs:
+            y_train_pred = c.predict(self.X_train)
+            y_test_pred = c.predict(self.X_test)
+            train_acc.append(metrics.accuracy_score(y_train_pred, self.y_train))
+            test_acc.append(metrics.accuracy_score(y_test_pred, self.y_test))
+
+        plt.scatter(ccp_alphas, train_acc)
+        plt.scatter(ccp_alphas, test_acc)
+        plt.plot(ccp_alphas, train_acc, label='train_accuracy', drawstyle="steps-post")
+        plt.plot(ccp_alphas, test_acc, label='test_accuracy', drawstyle="steps-post")
+        plt.legend()
+        plt.xlim((0, 0.03))
+        plt.title('Accuracy vs alpha')
+        plt.show()
+
+        self.model = DecisionTreeClassifier(ccp_alpha=0.013)
+        self.train()
+        self.pre_pruning()
 
     def plot_confusionmatrix(self, y_train_pred, y_train, dom):
         print(f'{dom} Confusion matrix')
