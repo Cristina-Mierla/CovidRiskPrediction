@@ -87,7 +87,10 @@ class DataProcessing:
         newcomorb = 0
         comorb_list = comorb.split(",")
         for comb in comorb_list:
-            newcomorb += self.comorbiditati[comb]
+            try:
+                newcomorb += self.comorbiditati[comb]
+            except(KeyError):
+                newcomorb += 0
 
         newdataset["Comorbiditati"][0] = newcomorb
         newdataset["Varsta"][0] = age

@@ -9,6 +9,7 @@ from imblearn.under_sampling import RandomUnderSampler
 # from mlxtend.plotting import plot_decision_regions
 from pandas.plotting import andrews_curves
 from sklearn import metrics
+from sklearn import tree
 from sklearn.datasets import make_classification
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.gaussian_process import GaussianProcessClassifier
@@ -49,6 +50,7 @@ class Model:
 
         self.y = pd.DataFrame()
         self.X = pd.DataFrame()
+        self.target_names = None
         self.X_train = None
         self.X_test = None
         self.X_valid = None
@@ -65,7 +67,9 @@ class Model:
 
         self.train()
 
-        # self.plot_data()
+        self.pre_pruning()
+
+        self.plot_model()
         # self.model = pickle.load(open('model.pkl', 'rb'))
 
         # data_process.plt_data_distribution()
@@ -141,7 +145,7 @@ class Model:
     def train(self):
         self.scale_data()
 
-        target_names = ['Vindecat', 'Ameliorat', 'Stationar', 'Agravat', 'Decedat']  # stare externare
+        self.target_names = ['Vindecat', 'Ameliorat', 'Stationar', 'Agravat', 'Decedat']  # stare externare
 
         max_error_scoring = 'max_error'
         neg_mae_scoring = 'neg_mean_absolute_error'
@@ -156,9 +160,9 @@ class Model:
         kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=90210)
         cv_results = cross_validate(self.model, self.X_train, self.y_train, cv=kfold, scoring=scoring)
         clf = self.model.fit(self.X_train, self.y_train)
-        y_pred = clf.predict(self.X_valid)
+        y_pred = clf.predict(self.X_test)
         print("Decision Tree")
-        print(classification_report(self.y_valid, y_pred, target_names=target_names))
+        print(classification_report(self.y_test, y_pred, target_names=self.target_names))
 
         # self.model = KNeighborsClassifier(self.K)
         # self.model.fit(self.X_train, self.y_train)
@@ -166,8 +170,42 @@ class Model:
         # pickle.dump(self.model, open('model.pkl', 'wb'))
         # self.model = pickle.load(open('model.pkl', 'rb'))
 
+    def pre_pruning(self):
+        params = {'max_depth': [2, 4, 6, 8, 10, 12],
+                  'min_samples_split': [2, 3, 4],
+                  'min_samples_leaf': [1, 2]}
+
+        gcv = GridSearchCV(estimator=self.model, param_grid=params)
+        gcv.fit(self.X_train, self.y_train)
+
+        self.model = gcv.best_estimator_
+        self.model.fit(self.X_train, self.y_train)
+
+    def plot_confusionmatrix(self, y_train_pred, y_train, dom):
+        print(f'{dom} Confusion matrix')
+        cf = confusion_matrix(y_train_pred, y_train)
+        sns.heatmap(cf, annot=True, yticklabels=self.target_names
+                    , xticklabels=self.target_names, cmap='Blues', fmt='g')
+        plt.tight_layout()
+        plt.show()
+
     def plot_model(self):
         print(self.model.score(self.X_test, self.y_test))
+
+        features = self.X
+        plt.figure(figsize=(55, 55))
+        tree.plot_tree(self.model, feature_names=features, class_names=self.target_names, filled=True, fontsize=4)
+        plt.show()
+
+        enmax_palette = ["#e5833c", "#7fe63e", "#53e8cc", "#3c39e5", "#e539c0"]
+
+        sns.set_palette(palette=enmax_palette)
+
+        colors = pd.DataFrame({'Stare de externare': ['Vindecat', 'Ameliorat', 'Stationar', 'Agravat', 'Decedat'], 'val': [1, 1, 1, 1, 1]})
+        fig = sns.barplot(x='val', y='Stare de externare', data=colors)
+        fig.set_xticklabels([])
+        fig.set_xlabel('')
+        plt.show()
 
         value = 20000
         width = 20000
@@ -181,13 +219,21 @@ class Model:
         # plt.title('KNN with Diabetes Data')
         # plt.show()
 
-        y_pred = self.model.predict(self.X_test)
-        confusion_matrix(self.y_test, y_pred)
-        conf_matrix = pd.crosstab(self.y_test, y_pred, rownames=['True'], colnames=['Predicted'], margins=True)
-        print(conf_matrix)
+        y_train_pred = self.model.predict(self.X_train)
+        y_test_pred = self.model.predict(self.X_test)
 
-        cnf_matrix = metrics.confusion_matrix(self.y_test, y_pred)
-        sns.heatmap(pd.DataFrame(cnf_matrix), annot=True, cmap="YlGnBu", fmt='g')
+        # confusion_matrix(self.y_test, y_test_pred)
+        # conf_matrix = pd.crosstab(self.y_test, y_test_pred, rownames=['True'], colnames=['Predicted'], margins=True)
+        # print(conf_matrix)
+
+        print(f'Train score {metrics.accuracy_score(y_train_pred, self.y_train)}')
+        print(f'Test score {metrics.accuracy_score(y_test_pred, self.y_test)}')
+        self.plot_confusionmatrix(self.y_train, y_train_pred, dom='Train')
+        self.plot_confusionmatrix(self.y_test, y_test_pred,  dom='Test')
+        plt.show()
+
+        cnf_matrix = metrics.confusion_matrix(self.y_test, y_test_pred)
+        sns.heatmap(pd.DataFrame(cnf_matrix), annot=True, cmap="Blues", fmt='g')
         plt.title('Confusion matrix', y=1.1)
         plt.ylabel('Actual label')
         plt.xlabel('Predicted label')
@@ -195,12 +241,12 @@ class Model:
 
         plt.figure(figsize=(15, 10))
         sample = self.scaled_dataset.sample(frac=0.05)
-        andrews_curves(sample, "Outcome", color=('red', 'yellow'))
+        andrews_curves(sample, "stare_externare", color=('red', 'yellow'))
         plt.title('Andrews Curves Plot', fontsize=20, fontweight='bold')
         plt.legend(loc=1, prop={'size': 15}, frameon=True, shadow=True, facecolor="white", edgecolor="black")
         plt.show()
 
-        print(classification_report(self.y_test, y_pred))
+        print(classification_report(self.y_test, y_test_pred))
 
     def plot_roc(self):
         y_pred_proba = self.model.predict_proba(self.X_test)[:, 1]
@@ -241,3 +287,5 @@ class Model:
         # pickle.dump(self.model, open('model.pkl', 'wb'))
 
         return output1, output2
+
+
