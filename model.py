@@ -332,4 +332,24 @@ class Model:
 
         return output1, output2
 
+    def statistics(self, prediction_data):
+
+        output1, output2 = self.predict(prediction_data)
+
+        filename = "age_result_" + str(prediction_data[-1])
+
+        # f, ax = plt.subplots(figsize=(10, 5))
+        # # f.add_subplot(1, 1, 1)
+        plt.scatter(self.dataset["Varsta"], self.dataset["stare_externare"], c='b')
+        plt.scatter(prediction_data[0], output1, c='r')
+        plt.xlabel("Age")
+        plt.ylabel("Hospital release state")
+        plt.title("The patient in relation with the rest of the dataset")
+        plt.savefig(filename)
+        plt.show()
+
+        filename += ".png"
+
+        return filename
+
 

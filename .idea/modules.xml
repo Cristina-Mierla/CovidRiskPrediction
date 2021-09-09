@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../ACCNDataVisualization/.idea/ACCNDataVisualization.iml" filepath="$PROJECT_DIR$/../ACCNDataVisualization/.idea/ACCNDataVisualization.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/CovidRiskPrediction.iml" filepath="$PROJECT_DIR$/.idea/CovidRiskPrediction.iml" />
     </modules>
   </component>

@@ -42,7 +42,7 @@ class DataProcessing:
         # self.data = [[self.__preg, self.__gluc, self.__blpr, self.__skth, self.__insu, self.__bmi, self.__pedi, self.__age]]
 
     def predict(self, prediction_data):
-        # prediction_data = [age, sex, diagnos_int, spitalizare, ati, analize]
+        # prediction_data = [age, sex, diagnos_int, spitalizare, ati, analize, id]
 
         age = prediction_data[0]
         sex = prediction_data[1]
