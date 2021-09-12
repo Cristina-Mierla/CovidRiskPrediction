@@ -56,8 +56,8 @@ def get_med_rec():
         return "Invalid request", 400
 
 
-@app.route('/statistics', methods=['POST', 'GET'])
-def get_stat():
+@app.route('/statistics1', methods=['POST', 'GET'])
+def get_stat1():
     age = None
     diagnos_int = None
     sex = None
@@ -84,7 +84,46 @@ def get_stat():
 
         prediction_data = [age, sex, diagnos_int, spitalizare, ati, analize, comorb, id]
 
-        filename = prediction_model.statistics(prediction_data)
+        filename = prediction_model.statistics1(prediction_data)
+
+        return send_file(filename, mimetype='image/png'), 200
+
+        # return result, 200
+
+    else:
+
+        return "Invalid request", 400
+
+
+@app.route('/statistics2', methods=['POST', 'GET'])
+def get_stat2():
+    age = None
+    diagnos_int = None
+    sex = None
+    spitalizare = None
+    ati = None
+    analize = None
+    id = None
+
+    # daca exista si e json
+    if request:
+
+        # request_data = request.get_json()
+
+        form = request.form
+
+        age = json.loads(form["RiskPred"])["Age"]
+        sex = json.loads(form["RiskPred"])["Gender"]
+        diagnos_int = json.loads(form["RiskPred"])["Admission_diagnostic"]
+        spitalizare = json.loads(form["RiskPred"])["Hospitalization"]
+        ati = json.loads(form["RiskPred"])["ATI"]
+        analize = json.loads(form['RiskPred'])['Analyzes']
+        comorb = json.loads(form['RiskPred'])['Comorbidities']
+        id = json.loads(form['RiskPred'])['Id']
+
+        prediction_data = [age, sex, diagnos_int, spitalizare, ati, analize, comorb, id]
+
+        filename = prediction_model.statistics2(prediction_data)
 
         return send_file(filename, mimetype='image/png'), 200
 

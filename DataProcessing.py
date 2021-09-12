@@ -5,6 +5,7 @@ import matplotlib.patches as mpatches
 import seaborn as sns
 from scipy.stats import pearsonr, spearmanr
 import csv
+import pickle
 
 sns.set()
 pd.set_option('display.max_rows', 500)
@@ -12,34 +13,64 @@ pd.set_option('display.max_columns', 500)
 pd.set_option('display.width', 1000)
 
 
+def save_obj(obj, name):
+    with open('obj/' + name + '.pkl', 'wb') as f:
+        pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
+
+
+def load_obj(name):
+    with open('obj/' + name + '.pkl', 'rb') as f:
+        return pickle.load(f)
+
+
 class DataProcessing:
 
     def __init__(self, dataset):
         self.dataset = dataset
         self.df = pd.DataFrame(self.dataset)
+        self.comorbiditati = None
 
-        self.copy_dataset = self.dataset
+        filename_dataset = "dataset_processed.csv"
+        filename_comorb = "comorb_weight.csv"
 
-        self.boala = None
+        try:
+            with open(filename_dataset, mode='r') as infile:
+                print("Dataset saved from file " + filename_dataset)
+                self.dataset = pd.read_csv(filename_dataset, parse_dates=True)
+                self.df = pd.DataFrame(self.dataset)
 
-        self.replace_columns()
-        self.change_medicatie()
-        self.analize_columns()
-        self.comorbiditati = self.comorbiditati_columns()
-        self.diagnos_columns()
+            with open(filename_comorb, mode='r') as infile:
+                print("Dictionary saved from file " + filename_comorb)
+                reader = csv.reader(infile)
+                self.comorbiditati = {rows[0]: rows[1] for rows in reader}
 
-        self.describe()
+        except IOError:
+            print("Files " + filename_dataset + " " + filename_comorb + " not found")
+            self.dataset = dataset
+            self.df = pd.DataFrame(self.dataset)
 
-        self.comorb = self.df["Comorbiditati"]
-        self.exetern = self.df["stare_externare"]
-        self.varsta = self.df["Varsta"]
-        self.spitalizare = self.df["Zile_spitalizare"]
-        self.diagnos_int = self.df["Diag_pr_int"]
-        self.com_ext = self.df[["Comorbiditati", "stare_externare"]]
+            self.boala = None
+
+            self.replace_columns()
+            self.change_medicatie()
+            self.analize_columns()
+            self.comorbiditati = self.comorbiditati_columns()
+            self.diagnos_columns()
+
+            self.describe()
+
+            self.comorb = self.df["Comorbiditati"]
+            self.exetern = self.df["stare_externare"]
+            self.varsta = self.df["Varsta"]
+            self.spitalizare = self.df["Zile_spitalizare"]
+            self.diagnos_int = self.df["Diag_pr_int"]
+            self.com_ext = self.df[["Comorbiditati", "stare_externare"]]
+
+            self.df.to_csv(filename_dataset, header=True)
+
         # ["Sex", "Varsta", "Zile_spitalizare", "zile_ATI", "Diag_pr_int", 'Analize_prim_set', "Comorbiditati", "AN", "precod", "FO",
         #  "Data_Examinare_Radiologie", "stare_externare", "forma_boala",  "Radiologie", "rezultat_radiologie", "Proceduri",
         #  "Proceduri_Radiologie", "tip_externare", "unde_pleaca", "Diag_pr_ext"]
-        # self.data = [[self.__preg, self.__gluc, self.__blpr, self.__skth, self.__insu, self.__bmi, self.__pedi, self.__age]]
 
     def predict(self, prediction_data):
         # prediction_data = [age, sex, diagnos_int, spitalizare, ati, analize, id]
@@ -88,7 +119,7 @@ class DataProcessing:
         comorb_list = comorb.split(",")
         for comb in comorb_list:
             try:
-                newcomorb += self.comorbiditati[comb]
+                newcomorb += float(self.comorbiditati[comb])
             except(KeyError):
                 newcomorb += 0
 
@@ -139,15 +170,20 @@ class DataProcessing:
         Making categorical data numerical. <- TO BE CHANGED, NOW HARDCODED
         :return:
         """
-        self.df.drop(["AN", "precod", "FO", "Data_Examinare_Radiologie", "Radiologie", "rezultat_radiologie", "Proceduri", "Proceduri_Radiologie", "tip_externare", "unde_pleaca"], inplace=True, axis='columns')
+        self.df.drop(
+            ["AN", "precod", "FO", "Data_Examinare_Radiologie", "Radiologie", "rezultat_radiologie", "Proceduri",
+             "Proceduri_Radiologie", "tip_externare", "unde_pleaca"], inplace=True, axis='columns')
 
         self.df.replace("NULL", np.NAN, inplace=True)
         self.df.replace("", np.NAN, inplace=True)
         self.df.replace("_", np.NAN, inplace=True)
 
         self.df.Sex.replace(("F", "M"), (0, 1), inplace=True)
-        self.df.stare_externare.replace(("Vindecat", "Ameliorat", "Stationar", "AGRAVAT                                           ", "Decedat"), (0, 1, 2, 3, 4), inplace=True)
-        self.df.forma_boala.replace(('1.USOARA', '2. MODERATA', '3.SEVERA', 'PERICLITAT TRANSFUZIONAL'), (1, 2, 3, np.NaN), inplace=True)
+        self.df.stare_externare.replace(
+            ("Vindecat", "Ameliorat", "Stationar", "AGRAVAT                                           ", "Decedat"),
+            (0, 1, 2, 3, 4), inplace=True)
+        self.df.forma_boala.replace(('1.USOARA', '2. MODERATA', '3.SEVERA', 'PERICLITAT TRANSFUZIONAL'),
+                                    (1, 2, 3, np.NaN), inplace=True)
         self.df.forma_boala = self.df.forma_boala.fillna(self.df.forma_boala.median())
 
     def change_medicatie(self):
@@ -250,6 +286,14 @@ class DataProcessing:
 
         self.df["Comorbiditati"] = self.df["Comorbiditati"].astype(float)
 
+        csv_file = "comorb_weight.csv"
+        try:
+            with open(csv_file, 'w') as f:
+                for key in d.keys():
+                    f.write("%s,%s\n" % (key, d[key]))
+        except IOError:
+            print("I/O error")
+
         return d
 
     def diagnos_columns(self):
@@ -317,6 +361,7 @@ class DataProcessing:
     '''
     Plotting functions
     '''
+
     def plt_data_distribution(self):
         sns.set_palette("Purples_r")
 

@@ -1,5 +1,4 @@
 import pickle
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -28,6 +27,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVR, SVC
 from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
 # from xgboost import XGBClassifier
+from datetime import date, datetime
 
 from DataProcessing import DataProcessing
 
@@ -58,18 +58,15 @@ class Model:
         self.y_test = None
         self.y_valid = None
 
-        self.K = None
         self.model = None
-
-        self.accuracy = 0
 
         # self.test_models()
 
         self.train()
 
-        self.pre_pruning()
+        # self.pre_pruning()
 
-        self.post_pruning()
+        # self.post_pruning()
 
         # self.plot_model()
         # self.model = pickle.load(open('model.pkl', 'rb'))
@@ -84,7 +81,7 @@ class Model:
             sc_X.fit_transform(self.scaled_dataset.drop(["stare_externare", "forma_boala"], axis=1), ))
         self.y = self.scaled_dataset[["stare_externare"]]
 
-        oversample = ADASYN()
+        oversample = SMOTE()
         self.X, self.y = oversample.fit_resample(self.X, self.y)
         #
         # rus = RandomUnderSampler(random_state=0)
@@ -106,11 +103,6 @@ class Model:
 
     def test_models(self):
         self.scale_data()
-
-        max_error_scoring = 'max_error'
-        neg_mae_scoring = 'neg_mean_absolute_error'
-        r2_scoring = 'r2'
-        neg_mse_scoring = 'neg_mean_squared_error'
 
         dfs = []
 
@@ -166,11 +158,8 @@ class Model:
         print("Decision Tree")
         print(classification_report(self.y_test, y_pred, target_names=self.target_names))
 
-        # self.model = KNeighborsClassifier(self.K)
-        # self.model.fit(self.X_train, self.y_train)
-        #
-        # pickle.dump(self.model, open('model.pkl', 'wb'))
-        # self.model = pickle.load(open('model.pkl', 'rb'))
+        pickle.dump(self.model, open('model.pkl', 'wb'))
+        self.model = pickle.load(open('model.pkl', 'rb'))
 
     def pre_pruning(self):
         params = {'max_depth': [2, 4, 6, 8, 10, 12],
@@ -251,18 +240,6 @@ class Model:
         fig.set_xlabel('')
         plt.show()
 
-        value = 20000
-        width = 20000
-        # plot_decision_regions(self.X.values, self.y.values, clf=self.model, legend=2,
-        #                       filler_feature_values={2: value, 3: value, 4: value, 5: value, 6: value, 7: value},
-        #                       filler_feature_ranges={2: width, 3: width, 4: width, 5: width, 6: width, 7: width},
-        #                       X_highlight=self.X_test.values,
-        #                       colors='red,green')
-        #
-        # # Adding axes annotations
-        # plt.title('KNN with Diabetes Data')
-        # plt.show()
-
         y_train_pred = self.model.predict(self.X_train)
         y_test_pred = self.model.predict(self.X_test)
 
@@ -292,34 +269,11 @@ class Model:
 
         print(classification_report(self.y_test, y_test_pred))
 
-    def plot_roc(self):
-        y_pred_proba = self.model.predict_proba(self.X_test)[:, 1]
-        fpr, tpr, thresholds = roc_curve(self.y_test, y_pred_proba)
-
-        plt.plot([0, 1], [0, 1], 'k--')
-        plt.plot(fpr, tpr, label='Knn')
-        plt.xlabel('fpr')
-        plt.ylabel('tpr')
-        plt.title('Knn(n_neighbors = {}) ROC curve'.format(self.K))
-        plt.show()
-
-        # Area under ROC curve
-        roc_auc_score(self.y_test, y_pred_proba)
-
-        # In case of classifier like knn the parameter to be tuned is n_neighbors
-        param_grid = {'n_neighbors': np.arange(1, 100)}
-        knn = KNeighborsClassifier()
-        knn_cv = GridSearchCV(knn, param_grid, cv=5)
-        knn_cv.fit(self.X, self.y)
-
-        print("Best Score:" + str(knn_cv.best_score_))
-        print("Best Parameters: " + str(knn_cv.best_params_))
-
     def predict(self, prediction_data):
         # prediction_data = [age, sex, diagnos_int, spitalizare, ati, analize]
         # print("Prediction accuracy -> {} %".format(self.accuracy * 100))
 
-        # self.model = pickle.load(open('model.pkl', 'rb'))
+        self.model = pickle.load(open('model.pkl', 'rb'))
 
         prediction_set = self.data_process.predict(prediction_data)
         output1 = self.model.predict(prediction_set)
@@ -328,23 +282,72 @@ class Model:
         print(output2)
 
         # df.to_csv('dataset_cop.csv', mode='a', index=False, header=False)
-        # pickle.dump(self.model, open('model.pkl', 'wb'))
+        pickle.dump(self.model, open('model.pkl', 'wb'))
 
         return output1, output2
 
-    def statistics(self, prediction_data):
+    def statistics1(self, prediction_data):
 
         output1, output2 = self.predict(prediction_data)
 
-        filename = "age_result_" + str(prediction_data[-1])
+        dt_string = datetime.now().strftime("_%Y-%m-%d_%H-%M")
+        filename = "statistics1\\age_result_" + str(prediction_data[-1]) + dt_string
 
-        # f, ax = plt.subplots(figsize=(10, 5))
-        # # f.add_subplot(1, 1, 1)
-        plt.scatter(self.dataset["Varsta"], self.dataset["stare_externare"], c='b')
+        prediction_set = self.data_process.predict(prediction_data)
+
+        dataset_gen = self.dataset[self.dataset["Sex"] == prediction_set["Sex"][0]]
+        plt.scatter(dataset_gen["Varsta"], dataset_gen["stare_externare"], c='b')
         plt.scatter(prediction_data[0], output1, c='r')
         plt.xlabel("Age")
         plt.ylabel("Hospital release state")
-        plt.title("The patient in relation with the rest of the dataset")
+        plt.title("The patient in relation with the rest of the dataset (with the same gender)")
+        plt.savefig(filename)
+        plt.show()
+
+        filename += ".png"
+
+        return filename
+
+    def statistics2(self, prediction_data):
+        dt_string = datetime.now().strftime("_%Y-%m-%d_%H-%M-%S")
+        filename = "statistics2\\days_result_" + str(prediction_data[-1]) + dt_string
+
+        prediction_set = self.data_process.predict(prediction_data)
+
+        dataset_gen = self.dataset[self.dataset["Sex"] == prediction_set["Sex"][0]]
+        dataset_gen_age1 = dataset_gen[prediction_data[0] - 10 <= dataset_gen["Varsta"]]
+        dataset_gen_age = dataset_gen_age1[dataset_gen_age1["Varsta"] <= prediction_data[0] + 10]
+        plt.subplots(figsize=(8, 5))
+        plt.scatter(dataset_gen_age["Zile_spitalizare"], dataset_gen_age["zile_ATI"], c='b')
+        plt.scatter(prediction_data[3], prediction_data[4], c='r')
+        plt.xlabel("Days spent in hospital")
+        plt.ylabel("Days spent at ICU")
+        plt.title("The patient in relation with the rest of the dataset (with the same gender and ± 10 years of age)")
+        plt.savefig(filename)
+        plt.show()
+
+        filename += ".png"
+
+        return filename
+
+    def statistics3(self, prediction_data):
+
+        output1, output2 = self.predict(prediction_data)
+
+        dt_string = datetime.now().strftime("_%Y-%m-%d_%H-%M-%S")
+        filename = "statistics3\\stat_" + str(prediction_data[-1]) + dt_string
+
+        # f, ax = plt.subplots(figsize=(10, 5))
+        # # f.add_subplot(1, 1, 1)
+
+        prediction_set = self.data_process.predict(prediction_data)
+
+        dataset_gen = self.dataset[self.dataset["Sex"] == prediction_set["Sex"][0]]
+        plt.scatter(dataset_gen["Varsta"], dataset_gen["stare_externare"], c='b')
+        plt.scatter(prediction_data[0], output1, c='r')
+        plt.xlabel("Age")
+        plt.ylabel("Hospital release state")
+        plt.title("The patient in relation with the rest of the dataset (with the same gender)")
         plt.savefig(filename)
         plt.show()
 
