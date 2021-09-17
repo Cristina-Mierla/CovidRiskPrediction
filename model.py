@@ -7,7 +7,7 @@ from imblearn.over_sampling import SMOTE, BorderlineSMOTE, SMOTENC, ADASYN
 from imblearn.under_sampling import RandomUnderSampler
 # from mlxtend.plotting import plot_decision_regions
 from pandas.plotting import andrews_curves
-from sklearn import metrics
+from sklearn import metrics, preprocessing
 from sklearn import tree
 from sklearn.datasets import make_classification
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
@@ -81,6 +81,8 @@ class Model:
             sc_X.fit_transform(self.scaled_dataset.drop(["stare_externare", "forma_boala"], axis=1), ))
         self.y = self.scaled_dataset[["stare_externare"]]
 
+        # self.X = preprocessing.normalize(self.X)
+
         oversample = SMOTE()
         self.X, self.y = oversample.fit_resample(self.X, self.y)
         #
@@ -91,15 +93,15 @@ class Model:
         # self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=1 / 3,
         #                                                                         random_state=56)
 
-        self.X_train, X_rem, self.y_train, y_rem = train_test_split(self.X, self.y, train_size=0.6,
-                                                                    random_state=56)
-
-        self.X_valid, self.X_test, self.y_valid, self.y_test = train_test_split(X_rem, y_rem, test_size=1 / 2,
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, train_size=4/5,
                                                                                 random_state=56)
+
+        # self.X_valid, self.X_test, self.y_valid, self.y_test = train_test_split(X_rem, y_rem, test_size=1 / 2,
+        #                                                                         random_state=56)
 
         self.X_train = sc_X.fit_transform(self.X_train)
         self.X_test = sc_X.transform(self.X_test)
-        self.X_valid = sc_X.transform(self.X_valid)
+        # self.X_valid = sc_X.transform(self.X_valid)
 
     def test_models(self):
         self.scale_data()
@@ -123,7 +125,7 @@ class Model:
             kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=90210)
             cv_results = cross_validate(model, self.X_train, self.y_train, cv=kfold, scoring=scoring)
             clf = model.fit(self.X_train, self.y_train)
-            y_pred = clf.predict(self.X_valid)
+            y_pred = clf.predict(self.X_test)
             print(name)
             print(classification_report(self.y_valid, y_pred, target_names=target_names))
 
@@ -150,7 +152,26 @@ class Model:
         names = []
         scoring = ['accuracy', 'precision_weighted', 'recall_weighted', 'f1_weighted']
 
-        self.model = DecisionTreeClassifier(ccp_alpha=0.013)
+        # # List of values to try for max_depth:
+        # max_depth_range = list(range(1, 25))
+        # # List to store the accuracy for each value of max_depth:
+        # accuracy = []
+        #
+        # for depth in max_depth_range:
+        #     clf = DecisionTreeClassifier(max_depth=depth,
+        #                                  random_state=0)
+        #     clf.fit(self.X_train, self.y_train)
+        #     score = clf.score(self.X_test, self.y_test)
+        #     accuracy.append(score)
+        #
+        # plt.plot(max_depth_range, accuracy)
+        # plt.plot(max_depth_range[accuracy.index(max(accuracy))], max(accuracy), c='r')
+        # plt.xticks(np.arange(0, 24, 2))
+        # plt.ylabel("Accuracy")
+        # plt.xlabel("Depth")
+        # plt.show()
+
+        self.model = DecisionTreeClassifier(criterion='gini', max_depth=10, ccp_alpha=0.013, random_state=90210)
         kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=90210)
         cv_results = cross_validate(self.model, self.X_train, self.y_train, cv=kfold, scoring=scoring)
         clf = self.model.fit(self.X_train, self.y_train)
@@ -234,7 +255,8 @@ class Model:
 
         sns.set_palette(palette=enmax_palette)
 
-        colors = pd.DataFrame({'Stare de externare': ['Vindecat', 'Ameliorat', 'Stationar', 'Agravat', 'Decedat'], 'val': [1, 1, 1, 1, 1]})
+        colors = pd.DataFrame({'Stare de externare': ['Vindecat', 'Ameliorat', 'Stationar', 'Agravat', 'Decedat'],
+                               'val': [1, 1, 1, 1, 1]})
         fig = sns.barplot(x='val', y='Stare de externare', data=colors)
         fig.set_xticklabels([])
         fig.set_xlabel('')
@@ -250,7 +272,7 @@ class Model:
         print(f'Train score {metrics.accuracy_score(y_train_pred, self.y_train)}')
         print(f'Test score {metrics.accuracy_score(y_test_pred, self.y_test)}')
         self.plot_confusionmatrix(self.y_train, y_train_pred, dom='Train')
-        self.plot_confusionmatrix(self.y_test, y_test_pred,  dom='Test')
+        self.plot_confusionmatrix(self.y_test, y_test_pred, dom='Test')
         plt.show()
 
         cnf_matrix = metrics.confusion_matrix(self.y_test, y_test_pred)
@@ -309,7 +331,7 @@ class Model:
         return filename
 
     def statistics2(self, prediction_data):
-        dt_string = datetime.now().strftime("_%Y-%m-%d_%H-%M-%S")
+        dt_string = datetime.now().strftime("_%Y-%m-%d_%H-%M")
         filename = "statistics2\\days_result_" + str(prediction_data[-1]) + dt_string
 
         prediction_set = self.data_process.predict(prediction_data)
@@ -335,24 +357,22 @@ class Model:
         output1, output2 = self.predict(prediction_data)
 
         dt_string = datetime.now().strftime("_%Y-%m-%d_%H-%M-%S")
-        filename = "statistics3\\stat_" + str(prediction_data[-1]) + dt_string
-
-        # f, ax = plt.subplots(figsize=(10, 5))
-        # # f.add_subplot(1, 1, 1)
+        filename = "statistics3\\hosp_state_" + str(prediction_data[-1]) + dt_string
 
         prediction_set = self.data_process.predict(prediction_data)
 
         dataset_gen = self.dataset[self.dataset["Sex"] == prediction_set["Sex"][0]]
-        plt.scatter(dataset_gen["Varsta"], dataset_gen["stare_externare"], c='b')
-        plt.scatter(prediction_data[0], output1, c='r')
+        dataset_ext = dataset_gen[dataset_gen["stare_externare"] == output1[0]]
+        plt.subplots(figsize=(8, 5))
+        plt.scatter(dataset_ext["Varsta"], dataset_ext["Zile_spitalizare"], c='b')
+        plt.scatter(prediction_data[0], prediction_data[3], c='r')
         plt.xlabel("Age")
-        plt.ylabel("Hospital release state")
-        plt.title("The patient in relation with the rest of the dataset (with the same gender)")
+        plt.ylabel("Days spent in hospital")
+        plt.title(
+            "The patient in relation with the rest of the dataset (with the same gender and hospital release state)")
         plt.savefig(filename)
         plt.show()
 
         filename += ".png"
 
         return filename
-
-

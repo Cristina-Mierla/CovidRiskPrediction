@@ -96,15 +96,18 @@ class DataProcessing:
             newsex = 0
         else:
             newsex = 1
-        diag = self.comorbiditati[diag_init]
+        try:
+            diag = self.comorbiditati[diag_init]
+        except KeyError:
+            diag = 0
 
         analize_list = analize.split(" || ")
         for analiza in analize_list:
-            analiza_name, rest = analiza.split(" - ", 1)
-            result, ignore = rest.split(" ", 1)
-            result = result.replace("<", "")
-            analiza_name = analiza_name.replace(" ", "")
             try:
+                analiza_name, rest = analiza.split(" - ", 1)
+                result, ignore = rest.split(" ", 1)
+                result = result.replace("<", "")
+                analiza_name = analiza_name.replace(" ", "")
                 result_int = float(result)
                 try:
                     newdataset[analiza_name][0] = result_int
