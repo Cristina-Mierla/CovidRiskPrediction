@@ -39,7 +39,7 @@ def get_med_rec():
 
         prediction_result, prediction_percentage = prediction_model.predict(prediction_data)
 
-        label = {0: 'Vindecat', 1: 'Ameliorat', 2: 'Stationar', 3: 'Agravat', 4: 'Decedat'}
+        label = {0: 'Cured', 1: 'Improved', 2: 'Stationary', 3: 'Worsened', 4: 'Deceased'}
 
         result = "The patient has a high chance to be release as: {}\n\n".format(label[prediction_result[0]])
 
