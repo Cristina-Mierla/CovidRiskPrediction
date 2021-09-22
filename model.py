@@ -68,7 +68,6 @@ class Model:
 
         # self.post_pruning()
 
-        self.plot_model()
         self.model = pickle.load(open('model.pkl', 'rb'))
 
         # data_process.plt_data_distribution()
